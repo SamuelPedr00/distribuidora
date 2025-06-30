@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('produto_id')->constrained('produtos')->onDelete('cascade');
             $table->decimal('preco_compra', 10, 2);
             $table->decimal('preco_venda', 10, 2);
-            $table->decimal('margem_lucro', 5, 2); // Percentual de lucro
+            $table->decimal('margem_lucro', 7, 2); // Percentual de lucro
             $table->timestamp('data_vigencia');
             $table->timestamp('data_fim')->nullable(); // Quando o preço deixou de valer
             $table->boolean('ativo')->default(true);

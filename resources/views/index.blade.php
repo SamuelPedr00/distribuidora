@@ -17,6 +17,7 @@
                 <button class="nav-tab" data-section="produtos">📦 Produtos</button>
                 <button class="nav-tab" data-section="estoque">📋 Estoque</button>
                 <button class="nav-tab" data-section="movimentacao">🔄 Movimentação</button>
+                <button class="nav-tab" data-section="venda">📦 Vendas</button>
                 <button class="nav-tab" data-section="caixa">💰 Fluxo de Caixa</button>
             </div>
         </div>
@@ -211,7 +212,8 @@
         <div id="movimentacao" class="content-section">
             <h2>🔄 Movimentação de Estoque</h2>
 
-            <form id="formMovimentacao">
+            <form method="POST" action="{{ route('cadastro_movimentacao') }}" id="formMovimentacao">
+                @csrf
                 <div class="form-row">
                     <div class="form-group">
                         <label for="produto_id">Produto</label>
@@ -225,7 +227,7 @@
                     </div>
                     <div class="form-group">
                         <label for="tipoMovimentacao">Tipo</label>
-                        <select id="tipoMovimentacao" required>
+                        <select name="tipo" id="tipoMovimentacao" required>
                             <option value="">Selecione o tipo</option>
                             <option value="entrada">📥 Entrada</option>
                             <option value="saida">📤 Saída</option>
@@ -235,16 +237,17 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="quantidadeMovimentacao">Quantidade</label>
-                        <input type="number" id="quantidadeMovimentacao" min="1" required>
+                        <input type="number" name="quantidade" id="quantidadeMovimentacao" min="1" required>
                     </div>
                     <div class="form-group">
                         <label for="valorMovimentacao">Valor Unitário (R$)</label>
-                        <input type="number" id="valorMovimentacao" step="0.01" required>
+                        <input type="number" name="preco_unitario" id="valorMovimentacao" step="0.01" required>
                     </div>
                 </div>
                 <div class="form-group form-full">
                     <label for="observacaoMovimentacao">Observação</label>
-                    <input type="text" id="observacaoMovimentacao" placeholder="Motivo da movimentação">
+                    <input type="text" id="observacaoMovimentacao" name="observacao"
+                        placeholder="Motivo da movimentação">
                 </div>
                 <button type="submit" class="btn btn-success">✅ Registrar Movimentação</button>
             </form>
@@ -263,34 +266,119 @@
                             <th>Observação</th>
                         </tr>
                     </thead>
-                    <tbody id="listaMovimentacoes"></tbody>
+                    <tbody id="listaMovimentacoes">
+                        @foreach ($movimentacoes as $mov)
+                            <tr>
+                                <td>{{ \Carbon\Carbon::parse($mov->data)->format('d/m/Y H:i') }}</td>
+                                <td>{{ $mov->produto->nome ?? 'Produto removido' }}</td>
+                                <td>{{ ucfirst($mov->tipo) }}</td>
+                                <td>{{ $mov->quantidade }}</td>
+                                <td>R$ {{ number_format($mov->preco_unitario, 2, ',', '.') }}</td>
+                                <td>R$ {{ number_format($mov->total, 2, ',', '.') }}</td>
+                                <td>{{ $mov->observacao }}</td>
+                            </tr>
+                        @endforeach
+
+                    </tbody>
                 </table>
             </div>
         </div>
+
+        <!-- Venda -->
+        <div id="venda" class="content-section">
+            <h2>🔄 Venda de Estoque</h2>
+
+            <form method="POST" action="{{ route('cadastro_venda') }}" id="formVenda">
+                @csrf
+                <div id="itensVenda">
+                    <div class="form-row item-venda">
+                        <div class="form-group">
+                            <label>Produto</label>
+                            <select name="itens[0][produto_id]" required>
+                                <option value="" disabled selected>Selecione um produto</option>
+                                @foreach ($produtos as $produto)
+                                    <option value="{{ $produto->id }}">{{ $produto->nome }}
+                                        ({{ $produto->codigo }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Quantidade</label>
+                            <input type="number" name="itens[0][quantidade]" min="1" required>
+                        </div>
+                        <button type="button" class="btn btn-danger remove-item">🗑</button>
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-secondary" id="addItem" style="margin-top: 15px;">➕
+                    Adicionar
+                    Produto</button>
+
+                <div class="form-group form-full">
+                    <label>Observações</label>
+                    <input type="text" name="observacoes" placeholder="Motivo da venda">
+                </div>
+                <button type="submit" class="btn btn-success">✅ Registrar Venda</button>
+            </form>
+
+
+            <h3>📄 Histórico de Vendas</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Produto</th>
+                            <th>Tipo</th>
+                            <th>Quantidade</th>
+                            <th>Valor Compra</th>
+                            <th>Valor Venda</th>
+                            <th>Observação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaVenda">
+                        @foreach ($vendas as $venda)
+                            <tr>
+                                <td>{{ \Carbon\Carbon::parse($venda->data_venda)->format('d/m/Y H:i') }}</td>
+                                <td>#{{ $venda->numero_venda }}</td>
+                                <td>{{ ucfirst($venda->status) }}</td>
+                                <td>-</td> {{-- Quantidade total não está no model, precisa calcular via relacionamento --}}
+                                <td>R$ {{ number_format($venda->total_custo, 2, ',', '.') }}</td>
+                                <td>R$ {{ number_format($venda->total_venda, 2, ',', '.') }}</td>
+                                <td>{{ $venda->observacoes ?? '-' }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
 
         <!-- Fluxo de Caixa -->
         <div id="caixa" class="content-section">
             <h2>💰 Fluxo de Caixa</h2>
 
-            <form id="formCaixa">
+            <form id="formCaixa" action="{{ route('cadastro_caixa') }}" method="POST">
+                @csrf
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="tipoCaixa">Tipo</label>
-                        <select id="tipoCaixa" required>
+                        <label for="tipo">Tipo</label>
+                        <select name="tipo" id="tipo" required>
                             <option value="">Selecione o tipo</option>
                             <option value="entrada">💵 Entrada</option>
                             <option value="saida">💸 Saída</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="valorCaixa">Valor (R$)</label>
-                        <input type="number" id="valorCaixa" step="0.01" required>
+                        <label for="valor">Valor (R$)</label>
+                        <input type="number" id="valor" name="valor" step="0.01" required>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="categoriaCaixa">Categoria</label>
-                        <select id="categoriaCaixa" required>
+                        <label for="categoria">Categoria</label>
+                        <select id="categoria" name="categoria" required>
                             <option value="">Selecione a categoria</option>
                             <option value="venda">💰 Venda de Produtos</option>
                             <option value="compra">📦 Compra de Produtos</option>
@@ -303,14 +391,11 @@
                             <option value="outros">📝 Outros</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="dataCaixa">Data</label>
-                        <input type="date" id="dataCaixa" required>
-                    </div>
                 </div>
                 <div class="form-group form-full">
                     <label for="descricaoCaixa">Descrição</label>
-                    <input type="text" id="descricaoCaixa" required placeholder="Descrição da movimentação">
+                    <input type="text" name="observacao" id="descricaoCaixa" required
+                        placeholder="Descrição da movimentação">
                 </div>
                 <button type="submit" class="btn btn-warning">💾 Registrar no Caixa</button>
             </form>
@@ -392,12 +477,118 @@
 
 
         <script src="{{ asset('js/script.js') }}"></script>
+
+        <script>
+            function filtrarCaixa() {
+                const dataInicio = document.getElementById('dataInicio').value;
+                const dataFim = document.getElementById('dataFim').value;
+                const categoria = document.getElementById('filtroCategoria').value;
+
+                fetch(`/caixa/filtro?dataInicio=${dataInicio}&dataFim=${dataFim}&categoria=${categoria}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        atualizarTotais(data);
+                        listarMovimentacoes(data.dados);
+                        listarResumoCategorias(data.resumo);
+                    });
+            }
+
+            function atualizarTotais(data) {
+                document.getElementById('totalEntradas').textContent = formatarValor(data.entradas);
+                document.getElementById('totalSaidas').textContent = formatarValor(data.saidas);
+                document.getElementById('saldoPeriodo').textContent = formatarValor(data.saldo);
+            }
+
+            function listarMovimentacoes(dados) {
+                const tbody = document.getElementById('listaCaixa');
+                tbody.innerHTML = '';
+
+                dados.forEach(item => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${item.data}</td>
+                        <td>${item.tipo}</td>
+                        <td>${item.categoria}</td>
+                        <td>${item.descricao}</td>
+                        <td>${formatarValor(item.valor)}</td>
+                        <td><!-- Ações aqui, como Editar/Excluir --></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            function listarResumoCategorias(resumo) {
+                const container = document.getElementById('resumoCategorias');
+                container.innerHTML = '';
+
+                for (let categoria in resumo) {
+                    const div = document.createElement('div');
+                    div.classList.add('categoria-resumo');
+                    div.innerHTML = `<strong>${categoria}:</strong> ${formatarValor(resumo[categoria])}`;
+                    container.appendChild(div);
+                }
+            }
+
+            function limparFiltros() {
+                document.getElementById('dataInicio').value = '';
+                document.getElementById('dataFim').value = '';
+                document.getElementById('filtroCategoria').value = '';
+                filtrarCaixa(); // recarrega tudo
+            }
+
+            function formatarValor(valor) {
+                return new Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                }).format(valor);
+            }
+
+            // Chamada inicial
+            window.onload = filtrarCaixa;
+        </script>
+
+
         <div id="msgModal" class="msg-modal">
             <div class="msg-modal-content" id="msgModalContent">
                 <span id="msgModalClose" class="msg-modal-close">&times;</span>
                 <p id="msgModalText"></p>
             </div>
         </div>
+
+        <script>
+            let index = 1;
+
+            document.getElementById('addItem').addEventListener('click', function() {
+                const container = document.getElementById('itensVenda');
+                const newRow = document.createElement('div');
+                newRow.classList.add('form-row', 'item-venda');
+                newRow.innerHTML = `
+                    <div class="form-group">
+                        <label>Produto</label>
+                        <select name="itens[${index}][produto_id]" required>
+                            <option value="" disabled selected>Selecione um produto</option>
+                            @foreach ($produtos as $produto)
+                                <option value="{{ $produto->id }}">{{ $produto->nome }} ({{ $produto->codigo }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Quantidade</label>
+                        <input type="number" name="itens[${index}][quantidade]" min="1" required>
+                    </div>
+                    <button type="button" class="btn btn-danger remove-item">🗑</button>
+                `;
+                container.appendChild(newRow);
+                index++;
+            });
+
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-item')) {
+                    e.target.closest('.item-venda').remove();
+                }
+            });
+        </script>
+
 
         <script>
             document.addEventListener('DOMContentLoaded', () => {

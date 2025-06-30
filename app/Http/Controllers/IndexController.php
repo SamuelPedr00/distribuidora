@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Produto;
 use App\Models\Caixa;
+use App\Models\Movimentacao;
+use App\Models\Venda;
+
 
 
 class IndexController extends Controller
@@ -45,6 +48,9 @@ class IndexController extends Controller
             ) as total
         ")->value('total');
 
+        $movimentacoes = Movimentacao::with('produto')->orderByDesc('data')->get();
+        $vendas = Venda::orderByDesc('data_venda')->get();
+
         $data = [
             'produtos' => $produtos,
             'totalProdutos' => $totalProdutos,
@@ -52,6 +58,8 @@ class IndexController extends Controller
             'quantidadeProdutosBaixo' => $quantidadeProdutosBaixo,
             'produtosComEstoque' => $produtosComEstoque,
             'valorCaixa' => $valorCaixa ?? 0,
+            'movimentacoes' => $movimentacoes,
+            'vendas' => $vendas,
         ];
 
         return view('index', $data);

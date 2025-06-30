@@ -16,7 +16,7 @@ class Movimentacao extends Model
         'produto_id',
         'tipo',
         'quantidade',
-        'valor',
+        'preco_unitario',
         'total',
         'observacao',
         'data'
