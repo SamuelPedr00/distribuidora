@@ -98,11 +98,11 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="precoProduto">Preço de Compra (R$)</label>
-                        <input type="number" id="precoProduto" name="compra" step="0.01" required>
+                        <input type="number" id="precoCompra" name="compra" step="0.01" required>
                     </div>
                     <div class="form-group">
                         <label for="precoProduto">Preço de Venda (R$)</label>
-                        <input type="number" id="precoProduto" name="venda" step="0.01" required>
+                        <input type="number" id="precoVenda" name="venda" step="0.01" required>
                     </div>
                     <div class="form-group">
                         <label for="categoriaProduto">Categoria</label>
@@ -241,7 +241,7 @@
                     </div>
                     <div class="form-group">
                         <label for="valorMovimentacao">Valor Unitário (R$)</label>
-                        <input type="number" name="preco_unitario" id="valorMovimentacao" step="0.01" required>
+                        <input type="number" name="preco_unitario" id="precoVenda" step="0.01" required>
                     </div>
                 </div>
                 <div class="form-group form-full">
@@ -475,8 +475,11 @@
         </div>
 
 
+        <script src="{{ asset('js/jquery.js') }}"></script>
 
         <script src="{{ asset('js/script.js') }}"></script>
+        <script src="{{ asset('js/bloqueio.js') }}"></script>
+
 
         <script>
             function filtrarCaixa() {
