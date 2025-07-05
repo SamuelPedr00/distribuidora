@@ -38,6 +38,7 @@ class ProdutoController extends Controller
             'codigo' => 'required|string|max:50|unique:produtos,codigo',
             'nome' => 'required|string|max:100|unique:produtos,nome',
             'compra' => 'required|numeric|min:0',
+            'venda_fardo' => 'nullable|numeric|min:0',
             'venda' => 'required|numeric|min:0',
             'categoria' => 'required|string|max:50',
         ], $messages);
@@ -49,6 +50,7 @@ class ProdutoController extends Controller
             'nome' => $validated['nome'],
             'preco_compra_atual' => $validated['compra'],
             'preco_venda_atual' => $validated['venda'],
+            'preco_venda_fardo' => $validated['venda_fardo'] ?? null,
             'categoria' => $validated['categoria']
         ]);
 
@@ -56,6 +58,16 @@ class ProdutoController extends Controller
         $produto->atualizarPrecos($validated['compra'], $validated['venda'], 'Preço inicial');
 
         return redirect()->back()->with('success', '✅ Produto cadastrado com sucesso!');
+    }
+
+    public function getPrecos($id)
+    {
+        $produto = Produto::findOrFail($id);
+
+        return response()->json([
+            'preco_venda_atual' => $produto->preco_venda_atual,
+            'preco_venda_fardo' => $produto->preco_venda_fardo,
+        ]);
     }
 
     public function editar(Request $request, $id)

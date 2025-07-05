@@ -16,12 +16,16 @@ class VendaController extends Controller
         $request->validate([
             'itens.*.produto_id' => 'required|exists:produtos,id',
             'itens.*.quantidade' => 'required|integer|min:1',
+            'itens.*.preco' => 'required|numeric|min:0.01',
         ], [
-            'itens.*.produto_id.required' => 'O campo produto é obrigatório para cada item.',
-            'itens.*.produto_id.exists' => 'O produto selecionado não existe no sistema.',
-            'itens.*.quantidade.required' => 'A quantidade é obrigatória para cada item.',
+            'itens.*.produto_id.required' => 'O campo produto é obrigatório.',
+            'itens.*.produto_id.exists' => 'O produto selecionado não existe.',
+            'itens.*.quantidade.required' => 'A quantidade é obrigatória.',
             'itens.*.quantidade.integer' => 'A quantidade deve ser um número inteiro.',
-            'itens.*.quantidade.min' => 'A quantidade mínima para venda é 1.',
+            'itens.*.quantidade.min' => 'A quantidade mínima é 1.',
+            'itens.*.preco.required' => 'Selecione o preço da venda.',
+            'itens.*.preco.numeric' => 'O preço deve ser numérico.',
+            'itens.*.preco.min' => 'O preço deve ser maior que zero.',
         ]);
 
         DB::transaction(function () use ($request) {
@@ -31,68 +35,71 @@ class VendaController extends Controller
             $totalVenda = 0;
             $totalCusto = 0;
 
-            // 1. Verifica se todos os produtos têm estoque suficiente
+            // Verifica estoque
             foreach ($request->itens as $item) {
                 $produto = Produto::findOrFail($item['produto_id']);
                 $quantidade = $item['quantidade'];
 
-                $estoque = $produto->estoque;
-
-                if (!$estoque || $estoque->quantidade < $quantidade) {
+                if ($produto->estoque->quantidade < $quantidade) {
                     throw new \Exception("Estoque insuficiente para o produto: {$produto->nome}");
                 }
             }
 
-            // 2. Calcula totais
-            foreach ($request->itens as $item) {
-                $produto = Produto::findOrFail($item['produto_id']);
-                $quantidade = $item['quantidade'];
-
-                $precoCompra = $produto->preco_compra_atual;
-                $precoVenda = $produto->preco_venda_atual;
-
-                $totalVenda += $precoVenda * $quantidade;
-                $totalCusto += $precoCompra * $quantidade;
-            }
-
-            // 3. Cria a venda
+            // Cria a venda
             $venda = Venda::create([
                 'numero_venda' => $numeroVenda,
-                'total_venda' => $totalVenda,
-                'total_custo' => $totalCusto,
-                'lucro_total' => $totalVenda - $totalCusto,
+                'total_venda' => 0, // será atualizado após os cálculos
+                'total_custo' => 0,
+                'lucro_total' => 0,
                 'status' => 'concluida',
                 'observacoes' => $request->observacoes,
                 'data_venda' => $dataVenda,
             ]);
 
-            // 4. Cria os itens da venda e atualiza o estoque
+            // Processa itens
             foreach ($request->itens as $item) {
                 $produto = Produto::findOrFail($item['produto_id']);
                 $quantidade = $item['quantidade'];
+                $precoVendaSelecionado = $item['preco']; // vindo do form
+                $precoCompra = $produto->preco_compra_atual;
+
+                $valorTotal = $precoVendaSelecionado * $quantidade;
+                $custoTotal = $precoCompra * $quantidade;
+                $lucro = $valorTotal - $custoTotal;
 
                 ItemVenda::create([
                     'venda_id' => $venda->id,
                     'produto_id' => $produto->id,
                     'quantidade' => $quantidade,
-                    'preco_compra_unitario' => $produto->preco_compra_atual,
-                    'preco_venda_unitario' => $produto->preco_venda_atual,
-                    'custo_total' => $produto->preco_compra_atual * $quantidade,
-                    'valor_total' => $produto->preco_venda_atual * $quantidade,
-                    'lucro_item' => ($produto->preco_venda_atual - $produto->preco_compra_atual) * $quantidade,
+                    'preco_compra_unitario' => $precoCompra,
+                    'preco_venda_unitario' => $precoVendaSelecionado,
+                    'custo_total' => $custoTotal,
+                    'valor_total' => $valorTotal,
+                    'lucro_item' => $lucro,
                 ]);
-                // Criar registro no caixa
-                Caixa::create([
-                    'tipo'      => 'entrada',
-                    'categoria' => 'Categoria Especial', // ou outro valor conforme o caso
-                    'descricao' => $request->observacoes ?? 'Sem observação',
-                    'valor'     => $totalVenda,
-                    'data'      => now(),
-                ]);
+
+                $totalVenda += $valorTotal;
+                $totalCusto += $custoTotal;
+
                 // Atualiza estoque
-                $estoque = $produto->estoque;
-                $estoque->decrement('quantidade', $quantidade);
+                $produto->estoque->decrement('quantidade', $quantidade);
             }
+
+            // Atualiza venda com totais
+            $venda->update([
+                'total_venda' => $totalVenda,
+                'total_custo' => $totalCusto,
+                'lucro_total' => $totalVenda - $totalCusto,
+            ]);
+
+            // Cria entrada no caixa (fora do loop)
+            Caixa::create([
+                'tipo'      => 'entrada',
+                'categoria' => 'Venda de Produto',
+                'descricao' => $request->observacoes ?? 'Venda registrada',
+                'valor'     => $totalVenda,
+                'data'      => $dataVenda,
+            ]);
         });
 
         return redirect()->back()->with('success', 'Venda registrada com sucesso.');

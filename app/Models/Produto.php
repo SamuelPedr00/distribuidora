@@ -16,6 +16,7 @@ class Produto extends Model
         'nome',
         'preco_venda_atual',
         'preco_compra_atual',
+        'preco_venda_fardo',
         'categoria',
         'descricao',
         'status'

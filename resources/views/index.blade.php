@@ -108,6 +108,10 @@
                         <label for="categoriaProduto">Categoria</label>
                         <input type="text" id="categoriaProduto" name="categoria" required>
                     </div>
+                    <div class="form-group">
+                        <label for="precoFardo">Preço de Venda Fardo (R$)</label>
+                        <input type="number" id="precoFardo" name="venda_fardo" step="0.01">
+                    </div>
                 </div>
                 <div class="form-group form-full">
                     <label for="descricaoProduto">Descrição</label>
@@ -298,22 +302,8 @@
                 @csrf
                 <div id="itensVenda">
                     <div class="form-row item-venda">
-                        <div class="form-group">
-                            <label>Produto</label>
-                            <select name="itens[0][produto_id]" required>
-                                <option value="" disabled selected>Selecione um produto</option>
-                                @foreach ($produtos as $produto)
-                                    <option value="{{ $produto->id }}">{{ $produto->nome }}
-                                        ({{ $produto->codigo }})
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Quantidade</label>
-                            <input type="number" name="itens[0][quantidade]" min="1" required>
-                        </div>
-                        <button type="button" class="btn btn-danger remove-item">🗑</button>
+
+
                     </div>
                 </div>
 
@@ -341,6 +331,7 @@
                             <th>Valor Compra</th>
                             <th>Valor Venda</th>
                             <th>Observação</th>
+                            <th>Lucro</th>
                         </tr>
                     </thead>
                     <tbody id="listaVenda">
@@ -353,6 +344,9 @@
                                 <td>R$ {{ number_format($venda->total_custo, 2, ',', '.') }}</td>
                                 <td>R$ {{ number_format($venda->total_venda, 2, ',', '.') }}</td>
                                 <td>{{ $venda->observacoes ?? '-' }}</td>
+                                <td>
+                                    R$ {{ number_format($venda->total_venda - $venda->total_custo, 2, ',', '.') }}
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -567,6 +561,7 @@
         <script>
             let index = 1;
 
+            // Adiciona novo item de venda
             document.getElementById('addItem').addEventListener('click', function() {
                 const container = document.getElementById('itensVenda');
                 const newRow = document.createElement('div');
@@ -574,7 +569,7 @@
                 newRow.innerHTML = `
                     <div class="form-group">
                         <label>Produto</label>
-                        <select name="itens[${index}][produto_id]" required>
+                        <select name="itens[${index}][produto_id]" class="produto-select" required>
                             <option value="" disabled selected>Selecione um produto</option>
                             @foreach ($produtos as $produto)
                                 <option value="{{ $produto->id }}">{{ $produto->nome }} ({{ $produto->codigo }})</option>
@@ -585,15 +580,56 @@
                         <label>Quantidade</label>
                         <input type="number" name="itens[${index}][quantidade]" min="1" required>
                     </div>
+                    <div class="form-group">
+                        <label>Preço</label>
+                        <select name="itens[${index}][preco]" class="select-preco" required>
+                            <option value="">Selecione um produto primeiro</option>
+                        </select>
+                    </div>
                     <button type="button" class="btn btn-danger remove-item">🗑</button>
                 `;
                 container.appendChild(newRow);
                 index++;
             });
 
+            // Remove item
             document.addEventListener('click', function(e) {
                 if (e.target.classList.contains('remove-item')) {
                     e.target.closest('.item-venda').remove();
+                }
+            });
+
+            // Escuta mudanças em qualquer select de produto
+            document.addEventListener('change', function(e) {
+                if (e.target.classList.contains('produto-select')) {
+                    const produtoId = e.target.value;
+                    const itemVenda = e.target.closest('.item-venda');
+                    const selectPreco = itemVenda.querySelector('.select-preco');
+
+                    if (!produtoId) return;
+
+                    fetch('/produto/precos/' + produtoId)
+                        .then(response => response.json())
+                        .then(data => {
+                            selectPreco.innerHTML = '';
+
+                            if (data.preco_venda_atual) {
+                                selectPreco.innerHTML += `
+                                    <option value="${data.preco_venda_atual}">
+                                        Unitário - R$ ${parseFloat(data.preco_venda_atual).toFixed(2).replace('.', ',')}
+                                    </option>`;
+                            }
+
+                            if (data.preco_venda_fardo) {
+                                selectPreco.innerHTML += `
+                                    <option value="${data.preco_venda_fardo}">
+                                        Fardo - R$ ${parseFloat(data.preco_venda_fardo).toFixed(2).replace('.', ',')}
+                                    </option>`;
+                            }
+                        })
+                        .catch(() => {
+                            alert('Erro ao buscar preços do produto.');
+                        });
                 }
             });
         </script>
