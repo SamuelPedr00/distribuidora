@@ -28,6 +28,10 @@
                 <label for="editVenda">Preço de Venda</label>
                 <input type="number" id="editVenda" name="venda" step="0.01">
             </div>
+            <div class="form-group">
+                <label for="editFardo">Preço de Venda Fardo</label>
+                <input type="number" id="editFardo" name="venda_fardo" step="0.01">
+            </div>
 
             <div class="form-row">
                 <button type="submit" class="btn btn-primary">💾 Salvar Alterações</button>

@@ -481,6 +481,7 @@
         <script src="{{ asset('js/bloqueio.js') }}"></script>
 
 
+
         <script>
             function filtrarCaixa() {
                 const dataInicio = document.getElementById('dataInicio').value;
@@ -695,6 +696,7 @@
                 document.getElementById('editCategoria').value = produto.categoria;
                 document.getElementById('editCompra').value = produto.preco_compra_atual;
                 document.getElementById('editVenda').value = produto.preco_venda_atual;
+                document.getElementById('editFardo').value = produto.preco_venda_fardo ?? '';
 
                 // Formulário de exclusão
                 const formExcluir = document.getElementById('formExcluirProduto');

@@ -72,43 +72,39 @@ class ProdutoController extends Controller
 
     public function editar(Request $request, $id)
     {
-        // Buscar produto
         $produto = Produto::findOrFail($id);
+
         $messages = [
             'codigo.string' => 'O código do produto deve ser um texto válido.',
             'codigo.max' => 'O código do produto não pode ter mais que 50 caracteres.',
-
             'nome.string' => 'O nome do produto deve ser um texto válido.',
             'nome.max' => 'O nome do produto não pode ter mais que 100 caracteres.',
             'nome.unique' => 'Já existe um produto com este nome.',
-
             'compra.numeric' => 'O preço de compra deve ser um número válido.',
             'compra.min' => 'O preço de compra não pode ser negativo.',
-
             'venda.numeric' => 'O preço de venda deve ser um número válido.',
             'venda.min' => 'O preço de venda não pode ser negativo.',
-
+            'venda_fardo.numeric' => 'O preço de venda por fardo deve ser um número válido.',
+            'venda_fardo.min' => 'O preço de venda por fardo não pode ser negativo.',
             'categoria.string' => 'A categoria deve ser um texto válido.',
             'categoria.max' => 'A categoria não pode ter mais que 50 caracteres.',
         ];
-        // Validação parcial: apenas campos presentes
+
         $rules = [
             'codigo' => 'sometimes|string|max:50',
             'nome' => 'sometimes|string|max:100|unique:produtos,nome,' . $produto->id,
             'compra' => 'sometimes|numeric|min:0',
             'venda' => 'sometimes|numeric|min:0',
+            'venda_fardo' => 'sometimes|nullable|numeric|min:0',
             'categoria' => 'sometimes|string|max:50',
         ];
 
-
-
         $validated = $request->validate($rules, $messages);
 
-        // Verifica se houve alteração nos preços
         $precoCompraNovo = $request->filled('compra') && $request->compra != $produto->preco_compra_atual;
         $precoVendaNovo = $request->filled('venda') && $request->venda != $produto->preco_venda_atual;
+        $precoFardoNovo = $request->filled('venda_fardo') && $request->venda_fardo != $produto->preco_venda_fardo;
 
-        // Atualiza apenas os campos enviados
         foreach (['codigo', 'nome', 'categoria'] as $campo) {
             if ($request->filled($campo)) {
                 $produto->$campo = $request->$campo;
@@ -123,11 +119,13 @@ class ProdutoController extends Controller
             $produto->preco_venda_atual = $request->venda;
         }
 
-        // Salva alterações
+        if ($request->has('venda_fardo')) {
+            $produto->preco_venda_fardo = $request->venda_fardo;
+        }
+
         $produto->save();
 
-        // Atualiza histórico apenas se o preço tiver sido alterado
-        if ($precoCompraNovo || $precoVendaNovo) {
+        if ($precoCompraNovo || $precoVendaNovo || $precoFardoNovo) {
             $produto->atualizarPrecos(
                 $produto->preco_compra_atual,
                 $produto->preco_venda_atual,
