@@ -29,6 +29,12 @@ class Movimentacao extends Model
         'data' => 'datetime',
     ];
 
+    public function caixa()
+    {
+        return $this->hasOne(Caixa::class);
+    }
+
+
     // Relacionamento com produto (N:1)
     public function produto()
     {

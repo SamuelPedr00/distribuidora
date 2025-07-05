@@ -17,13 +17,21 @@ class Caixa extends Model
         'categoria',
         'descricao',
         'valor',
-        'data'
+        'data',
+        'movimentacao_id',
     ];
 
     protected $casts = [
         'valor' => 'decimal:2',
         'data' => 'date',
     ];
+
+
+    public function movimentacao()
+    {
+        return $this->belongsTo(Movimentacao::class);
+    }
+
 
     // Accessor para valor formatado
     public function getValorFormatadoAttribute()

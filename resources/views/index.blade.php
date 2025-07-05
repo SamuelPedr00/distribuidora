@@ -263,7 +263,7 @@
                             <th>Quantidade</th>
                             <th>Valor Unit.</th>
                             <th>Total</th>
-                            <th>Observação</th>
+                            <th>Ação</th>
                         </tr>
                     </thead>
                     <tbody id="listaMovimentacoes">
@@ -275,7 +275,13 @@
                                 <td>{{ $mov->quantidade }}</td>
                                 <td>R$ {{ number_format($mov->preco_unitario, 2, ',', '.') }}</td>
                                 <td>R$ {{ number_format($mov->total, 2, ',', '.') }}</td>
-                                <td>{{ $mov->observacao }}</td>
+                                <td>
+                                    <form action="{{ route('movimentacao.reverter', $mov->id) }}" method="POST"
+                                        onsubmit="return confirm('Tem certeza que deseja reverter esta movimentação?');">
+                                        @csrf
+                                        <button type="submit" class="btn btn-warning">↩️ Reverter</button>
+                                    </form>
+                                </td>
                             </tr>
                         @endforeach
 

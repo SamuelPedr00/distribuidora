@@ -11,3 +11,4 @@ Route::post('/cadastroMovimentacao', [\App\Http\Controllers\MovimentacaoControll
 Route::post('/cadastroVenda', [\App\Http\Controllers\VendaController::class, 'cadastrar'])->name('cadastro_venda');
 Route::post('/cadastroCaixa', [\App\Http\Controllers\CaixaController::class, 'cadastrar'])->name('cadastro_caixa');
 Route::get('/caixa/filtro', [\App\Http\Controllers\CaixaController::class, 'filtrar'])->name('filtrar');
+Route::post('/movimentacao/reverter/{id}', [\App\Http\Controllers\MovimentacaoController::class, 'reverter'])->name('movimentacao.reverter');

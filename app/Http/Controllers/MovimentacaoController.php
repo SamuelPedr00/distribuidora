@@ -49,6 +49,13 @@ class MovimentacaoController extends Controller
             $produto = Produto::with('estoque')->findOrFail($request->produto_id);
             $estoque = $produto->estoque;
 
+            if (!$estoque) {
+                // Cria o estoque se não existir
+                $estoque = $produto->estoque()->create([
+                    'quantidade' => 0
+                ]);
+            }
+
             // Atualiza o estoque do produto
             if ($request->tipo === 'entrada') {
                 $estoque->quantidade += $request->quantidade;
@@ -57,8 +64,9 @@ class MovimentacaoController extends Controller
             }
 
             $estoque->save();
+
             // Criar movimentação
-            Movimentacao::create([
+            $movimentacao = Movimentacao::create([
                 'produto_id'     => $request->produto_id,
                 'tipo'           => $request->tipo,
                 'quantidade'     => $request->quantidade,
@@ -68,22 +76,53 @@ class MovimentacaoController extends Controller
                 'data'           => now(),
             ]);
 
-            if ($request->tipo == 'entrada') {
-                $tipo = 'saida';
-            } else {
-                $tipo = 'entrada';
-            }
+            $tipo = $request->tipo == 'entrada' ? 'saida' : 'entrada';
 
-            // Criar registro no caixa
+            // Criar registro no caixa com vínculo à movimentação
             Caixa::create([
-                'tipo'      => $tipo,
-                'categoria' => 'Categoria Especial', // ou outro valor conforme o caso
-                'descricao' => $request->observacao ?? 'Sem observação',
-                'valor'     => $total,
-                'data'      => now(),
+                'tipo'            => $tipo,
+                'categoria'       => 'Categoria Especial',
+                'descricao'       => $request->observacao ?? 'Sem observação',
+                'valor'           => $total,
+                'data'            => now(),
+                'movimentacao_id' => $movimentacao->id,
             ]);
         });
 
+
         return redirect()->back()->with('success', 'Movimentação e registro no caixa criados com sucesso!');
+    }
+
+    public function reverter($id)
+    {
+        $mov = Movimentacao::findOrFail($id);
+        $produto = Produto::with('estoque')->find($mov->produto_id);
+
+        if (!$produto || !$produto->estoque) {
+            return redirect()->back()->withErrors(['error' => 'Produto ou estoque não encontrado para esta movimentação.']);
+        }
+
+        DB::transaction(function () use ($mov, $produto) {
+            $estoque = $produto->estoque;
+
+            // Reverter estoque
+            if ($mov->tipo === 'entrada') {
+                $estoque->quantidade -= $mov->quantidade;
+            } else {
+                $estoque->quantidade += $mov->quantidade;
+            }
+
+            $estoque->save();
+
+            // Remover o registro do caixa vinculado
+            if ($mov->caixa) {
+                $mov->caixa->delete();
+            }
+
+            // Deleta a movimentação
+            $mov->delete();
+        });
+
+        return redirect()->back()->with('success', 'Movimentação revertida com sucesso.');
     }
 }
