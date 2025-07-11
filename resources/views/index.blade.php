@@ -315,7 +315,8 @@
                     <label>Observações</label>
                     <input type="text" name="observacoes" placeholder="Motivo da venda">
                 </div>
-                <button type="submit" class="btn btn-success">✅ Registrar Venda</button>
+                <!-- Troque o botão de envio direto por esse -->
+                <button type="button" class="btn btn-success" id="abrirConfirmacao">✅ Registrar Venda</button>
             </form>
 
 
@@ -550,6 +551,57 @@
             // Chamada inicial
             window.onload = filtrarCaixa;
         </script>
+
+
+        @include('modals.confirma_venda')
+        <script>
+            function formatarPreco(valor) {
+                return parseFloat(valor).toFixed(2).replace('.', ',');
+            }
+
+            document.getElementById('abrirConfirmacao').addEventListener('click', function() {
+                const itens = document.querySelectorAll('.item-venda');
+                let resumoHtml = '';
+                let total = 0;
+
+                itens.forEach((item) => {
+                    const produtoSelect = item.querySelector('.produto-select');
+                    const quantidadeInput = item.querySelector('input[name^="itens"][name*="[quantidade]"]');
+                    const precoSelect = item.querySelector('.select-preco');
+
+                    if (!produtoSelect || !quantidadeInput || !precoSelect) return;
+
+                    const produtoNome = produtoSelect.selectedIndex > -1 ?
+                        produtoSelect.options[produtoSelect.selectedIndex].text :
+                        'Produto não selecionado';
+
+                    const quantidade = parseInt(quantidadeInput.value) || 0;
+                    const preco = parseFloat(precoSelect.value) || 0;
+                    const subtotal = quantidade * preco;
+
+                    total += subtotal;
+
+                    resumoHtml += `
+                        <p>
+                            ${produtoNome} (${quantidade} x R$ ${formatarPreco(preco)}) 
+                            = <strong>R$ ${formatarPreco(subtotal)}</strong>
+                        </p>`;
+                });
+
+                document.getElementById('resumoVenda').innerHTML = resumoHtml || '<p>Nenhum item adicionado.</p>';
+                document.getElementById('totalVenda').textContent = formatarPreco(total);
+                document.getElementById('confirmarVendaModal').style.display = 'flex';
+            });
+
+            document.getElementById('confirmarSubmit').addEventListener('click', function() {
+                document.getElementById('formVenda').submit();
+            });
+
+            document.getElementById('cancelarModal').addEventListener('click', function() {
+                document.getElementById('confirmarVendaModal').style.display = 'none';
+            });
+        </script>
+
 
 
         <div id="msgModal" class="msg-modal">
