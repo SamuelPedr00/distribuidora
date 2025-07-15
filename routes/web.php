@@ -13,3 +13,8 @@ Route::post('/cadastroCaixa', [\App\Http\Controllers\CaixaController::class, 'ca
 Route::get('/caixa/filtro', [\App\Http\Controllers\CaixaController::class, 'filtrar'])->name('filtrar');
 Route::post('/movimentacao/reverter/{id}', [\App\Http\Controllers\MovimentacaoController::class, 'reverter'])->name('movimentacao.reverter');
 Route::get('/produto/precos/{id}', [App\Http\Controllers\ProdutoController::class, 'getPrecos']);
+Route::post('/clientes', [App\Http\Controllers\ClienteController::class, 'store'])->name('clientes.store');
+Route::put('/clientes/{cliente}', [App\Http\Controllers\ClienteController::class, 'update'])->name('clientes.update');
+Route::post('/credito', [App\Http\Controllers\VendaController::class, 'registrarCredito'])->name('cadastro_credito');
+Route::get('/api/cliente/{id}/vendas-pendentes', [App\Http\Controllers\CreditoController::class, 'listarVendasPendentes']);
+Route::post('/receber-venda', [App\Http\Controllers\CreditoController::class, 'receberVenda'])->name('receber.venda');

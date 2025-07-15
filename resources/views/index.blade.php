@@ -18,6 +18,8 @@
                 <button class="nav-tab" data-section="estoque">📋 Estoque</button>
                 <button class="nav-tab" data-section="movimentacao">🔄 Movimentação</button>
                 <button class="nav-tab" data-section="venda">📦 Vendas</button>
+                <button class="nav-tab" data-section="credito">💳 Crédito</button>
+                <button class="nav-tab" data-section="cliente">👨‍🦱 Cliente</button>
                 <button class="nav-tab" data-section="caixa">💰 Fluxo de Caixa</button>
             </div>
         </div>
@@ -77,6 +79,115 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+        <!-- Crédito -->
+        <div id="credito" class="content-section">
+            <h2>💳 Módulo de Crédito</h2>
+
+            <form method="POST" action="{{ route('cadastro_credito') }}" id="formCredito">
+                @csrf
+                <div id="itensCredito">
+                    <div class="form-row item-credito"></div>
+                </div>
+
+                <button type="button" class="btn btn-secondary" id="addItemCredito" style="margin-top: 15px;">
+                    ➕ Adicionar Produto
+                </button>
+
+                <div class="form-group">
+                    <label>Cliente</label>
+                    <select name="cliente_id" required>
+                        <option value="" disabled selected>Selecione um cliente</option>
+                        @foreach ($clientes as $cliente)
+                            <option value="{{ $cliente->id }}">{{ $cliente->nome }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+
+                <!-- Campo oculto para indicar que é crédito -->
+                <input type="hidden" name="tipo_venda" value="credito">
+
+                <button type="button" class="btn btn-warning" id="registrarCredito">
+                    🟡 Registrar Crédito
+                </button>
+            </form>
+
+
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Crédito Devedor</th>
+                            <th>Visualizar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($clientesComCredito as $cliente)
+                            <tr>
+                                <td>{{ $cliente['nome'] }}</td>
+                                <td>R$ {{ number_format($cliente['credito'], 2, ',', '.') }}</td>
+                                <td>
+                                    <a href="#" class="btn btn-primary abrirModalCredito"
+                                        data-cliente-id="{{ $cliente['id'] }}"
+                                        data-cliente-nome="{{ $cliente['nome'] }}">
+                                        📄 Ver Detalhes
+                                    </a>
+
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="3">Nenhum cliente com crédito pendente.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <div id="cliente" class="content-section">
+            <h2>👨‍🦱 Módulo de Clientes</h2>
+            <form action="{{ route('clientes.store') }}" method="POST">
+                @csrf
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nomeProduto">Nome do Cliente</label>
+                        <input type="text" id="nomeProduto" name="nome" required>
+                    </div>
+
+                </div>
+
+                <button type="submit" class="btn btn-primary">💾 Cadastrar Cliente</button>
+            </form>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Editar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($clientes as $cliente)
+                            <tr>
+                                <td>{{ $cliente->nome }}</td>
+                                <td>
+                                    <button class="btn-edit"
+                                        onclick="abrirModalCliente({{ $cliente->id }}, '{{ $cliente->nome }}')">
+                                        Editar
+                                    </button>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
         </div>
 
         <!-- Produtos -->
@@ -345,9 +456,11 @@
                                 <td>R$ {{ number_format($venda->total_custo, 2, ',', '.') }}</td>
                                 <td>R$ {{ number_format($venda->total_venda, 2, ',', '.') }}</td>
                                 <td>{{ $venda->observacoes ?? '-' }}</td>
-                                <td>
+                                <td
+                                    style="color: {{ strtolower($venda->status) === 'concluida' ? 'green' : 'red' }};">
                                     R$ {{ number_format($venda->total_venda - $venda->total_custo, 2, ',', '.') }}
                                 </td>
+
                             </tr>
                         @endforeach
                     </tbody>
@@ -481,7 +594,96 @@
         <script src="{{ asset('js/script.js') }}"></script>
         <script src="{{ asset('js/bloqueio.js') }}"></script>
 
+        @include('modals.ver_detalhes')
 
+
+        <script>
+            document.querySelectorAll('.abrirModalCredito').forEach(botao => {
+                botao.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    const clienteId = this.dataset.clienteId;
+                    const nomeCliente = this.dataset.clienteNome;
+
+                    fetch(`/api/cliente/${clienteId}/vendas-pendentes`)
+                        .then(res => {
+                            if (!res.ok) {
+                                throw new Error('Erro na requisição');
+                            }
+                            return res.json();
+                        })
+                        .then(vendas => {
+                            let html = '';
+                            let total = 0;
+
+                            if (vendas.length === 0) {
+                                html = '<p>Nenhuma venda pendente.</p>';
+                            } else {
+                                vendas.forEach(venda => {
+                                    const subtotal = parseFloat(venda.total_venda || 0);
+                                    total += subtotal;
+
+                                    html += `
+                            <div class="card">
+                                <p><strong>Venda:</strong> ${venda.numero_venda || 'N/A'}</p>
+                                <p><strong>Data:</strong> ${venda.data_venda ? new Date(venda.data_venda).toLocaleString() : 'N/A'}</p>
+                                <ul style="margin-bottom: 5px;">
+                                    ${venda.itens && venda.itens.length > 0 ? 
+                                        venda.itens.map(item =>
+                                            `<li>${item.produto.nome} (${item.quantidade} x R$ ${parseFloat(item.preco_venda_unitario || 0).toFixed(2).replace('.', ',')})</li>`
+                                        ).join('') : 
+                                        '<li>Nenhum item encontrado</li>'
+                                    }
+                                </ul>
+                                <p><strong>Total:</strong> R$ ${subtotal.toFixed(2).replace('.', ',')}</p>
+                                <form method="POST" action="/receber-venda" style="margin-top: 5px;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="venda_id" value="${venda.id}">
+                                    <button type="submit" class="btn btn-success">💰 Receber</button>
+                                </form>
+                                <hr>
+                            </div>
+                        `;
+                                });
+                            }
+
+                            document.getElementById('nomeClienteModal').textContent = nomeCliente;
+                            document.getElementById('conteudoCreditos').innerHTML = html;
+                            document.getElementById('totalCredito').textContent = total.toFixed(2).replace(
+                                '.', ',');
+
+                            document.getElementById('modalCredito').style.display = 'flex';
+                        })
+                        .catch(error => {
+                            console.error('Erro:', error);
+                            alert('Erro ao buscar vendas pendentes.');
+                        });
+                });
+            });
+
+            document.getElementById('fecharModalCredito').addEventListener('click', function() {
+                document.getElementById('modalCredito').style.display = 'none';
+            });
+        </script>
+
+
+        @include('modals.editar_cliente')
+
+        <script>
+            function abrirModalCliente(id, nome) {
+                document.getElementById('modal-editar-cliente').style.display = 'flex';
+                document.getElementById('cliente_id').value = id;
+                document.getElementById('cliente_nome').value = nome;
+
+                // Atualiza o action do form dinamicamente
+                const form = document.getElementById('form-editar-cliente');
+                form.action = `/clientes/${id}`;
+            }
+
+            function fecharModalCliente() {
+                document.getElementById('modal-editar-cliente').style.display = 'none';
+            }
+        </script>
 
         <script>
             function filtrarCaixa() {
@@ -492,6 +694,7 @@
                 fetch(`/caixa/filtro?dataInicio=${dataInicio}&dataFim=${dataFim}&categoria=${categoria}`)
                     .then(response => response.json())
                     .then(data => {
+
                         atualizarTotais(data);
                         listarMovimentacoes(data.dados);
                         listarResumoCategorias(data.resumo);
@@ -555,18 +758,20 @@
 
         @include('modals.confirma_venda')
         <script>
+            let formularioAtual = null;
+
             function formatarPreco(valor) {
                 return parseFloat(valor).toFixed(2).replace('.', ',');
             }
 
-            document.getElementById('abrirConfirmacao').addEventListener('click', function() {
-                const itens = document.querySelectorAll('.item-venda');
+            function abrirModalConfirmacao(formulario) {
+                const itens = formulario.querySelectorAll('.item-venda');
                 let resumoHtml = '';
                 let total = 0;
 
                 itens.forEach((item) => {
                     const produtoSelect = item.querySelector('.produto-select');
-                    const quantidadeInput = item.querySelector('input[name^="itens"][name*="[quantidade]"]');
+                    const quantidadeInput = item.querySelector('input[name*="[quantidade]"]');
                     const precoSelect = item.querySelector('.select-preco');
 
                     if (!produtoSelect || !quantidadeInput || !precoSelect) return;
@@ -591,16 +796,33 @@
                 document.getElementById('resumoVenda').innerHTML = resumoHtml || '<p>Nenhum item adicionado.</p>';
                 document.getElementById('totalVenda').textContent = formatarPreco(total);
                 document.getElementById('confirmarVendaModal').style.display = 'flex';
+            }
+
+            // Abertura do modal para venda
+            document.getElementById('abrirConfirmacao').addEventListener('click', function() {
+                formularioAtual = document.getElementById('formVenda');
+                abrirModalConfirmacao(formularioAtual);
             });
 
+            // Abertura do modal para crédito
+            document.getElementById('registrarCredito').addEventListener('click', function() {
+                formularioAtual = document.getElementById('formCredito');
+                abrirModalConfirmacao(formularioAtual);
+            });
+
+            // Confirma o envio do formulário atual
             document.getElementById('confirmarSubmit').addEventListener('click', function() {
-                document.getElementById('formVenda').submit();
+                if (formularioAtual) {
+                    formularioAtual.submit();
+                }
             });
 
+            // Fecha o modal
             document.getElementById('cancelarModal').addEventListener('click', function() {
                 document.getElementById('confirmarVendaModal').style.display = 'none';
             });
         </script>
+
 
 
 
@@ -687,6 +909,90 @@
             });
         </script>
 
+        <script>
+            let indexCredito = 1;
+
+            document.getElementById('addItemCredito').addEventListener('click', function() {
+                const container = document.getElementById('itensCredito');
+                const newRow = document.createElement('div');
+                newRow.classList.add('form-row', 'item-venda');
+                newRow.innerHTML = `
+            <div class="form-group">
+                <label>Produto</label>
+                <select name="itens[${indexCredito}][produto_id]" class="produto-select" required>
+                    <option value="" disabled selected>Selecione um produto</option>
+                    @foreach ($produtos as $produto)
+                        <option value="{{ $produto->id }}">{{ $produto->nome }} ({{ $produto->codigo }})</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Quantidade</label>
+                <input type="number" name="itens[${indexCredito}][quantidade]" min="1" required>
+            </div>
+            <div class="form-group">
+                <label>Preço</label>
+                <select name="itens[${indexCredito}][preco]" class="select-preco" required>
+                    <option value="">Selecione um produto primeiro</option>
+                </select>
+            </div>
+            <button type="button" class="btn btn-danger remove-item">🗑</button>
+        `;
+                container.appendChild(newRow);
+                indexCredito++;
+            });
+
+            // Reaproveita o mesmo fetch de preços
+            document.addEventListener('change', function(e) {
+                if (e.target.classList.contains('produto-select')) {
+                    const produtoId = e.target.value;
+                    const itemVenda = e.target.closest('.item-venda');
+                    const selectPreco = itemVenda.querySelector('.select-preco');
+
+                    if (!produtoId) return;
+
+                    fetch('/produto/precos/' + produtoId)
+                        .then(response => response.json())
+                        .then(data => {
+                            selectPreco.innerHTML = '';
+
+                            if (data.preco_venda_atual) {
+                                selectPreco.innerHTML += `
+                            <option value="${data.preco_venda_atual}">
+                                Unitário - R$ ${parseFloat(data.preco_venda_atual).toFixed(2).replace('.', ',')}
+                            </option>`;
+                            }
+
+                            if (data.preco_venda_fardo) {
+                                selectPreco.innerHTML += `
+                            <option value="${data.preco_venda_fardo}">
+                                Fardo - R$ ${parseFloat(data.preco_venda_fardo).toFixed(2).replace('.', ',')}
+                            </option>`;
+                            }
+                        })
+                        .catch(() => {
+                            alert('Erro ao buscar preços do produto.');
+                        });
+                }
+            });
+
+            // Remove item
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-item')) {
+                    e.target.closest('.item-venda').remove();
+                }
+            });
+
+            // Validação e envio do crédito
+            document.getElementById('registrarCredito').addEventListener('click', function() {
+                const itens = document.querySelectorAll('#itensCredito .item-venda');
+                if (itens.length === 0) {
+                    alert('Adicione ao menos um item antes de registrar o crédito.');
+                    return;
+                }
+                document.getElementById('formCredito').submit();
+            });
+        </script>
 
         <script>
             document.addEventListener('DOMContentLoaded', () => {
@@ -728,6 +1034,7 @@
         </script>
 
 
+        <!-- script e modal para funcionamento da edição de Produto -->
 
         @include('modals.edicao_produto')
 

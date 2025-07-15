@@ -7,7 +7,7 @@ use App\Models\Produto;
 use App\Models\Caixa;
 use App\Models\Movimentacao;
 use App\Models\Venda;
-
+use App\Models\Cliente;
 
 
 class IndexController extends Controller
@@ -50,6 +50,20 @@ class IndexController extends Controller
 
         $movimentacoes = Movimentacao::with('produto')->orderByDesc('data')->get();
         $vendas = Venda::orderByDesc('data_venda')->get();
+        $clientes = Cliente::all();
+        $clientesComCredito = $clientes->map(function ($cliente) {
+            $totalCredito = $cliente->vendas()
+                ->where('status', 'pendente')
+                ->sum('total_venda');
+
+            return [
+                'id' => $cliente->id,
+                'nome' => $cliente->nome,
+                'credito' => $totalCredito,
+            ];
+        })->filter(function ($c) {
+            return $c['credito'] > 0;
+        })->values(); // remove vazios e reindexa
 
         $data = [
             'produtos' => $produtos,
@@ -60,6 +74,8 @@ class IndexController extends Controller
             'valorCaixa' => $valorCaixa ?? 0,
             'movimentacoes' => $movimentacoes,
             'vendas' => $vendas,
+            'clientes' => $clientes,
+            'clientesComCredito' => $clientesComCredito,
         ];
 
         return view('index', $data);

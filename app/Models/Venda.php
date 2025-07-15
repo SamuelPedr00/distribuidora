@@ -16,7 +16,7 @@ class Venda extends Model
         'total_custo',
         'lucro_total',
         'status',
-        'cliente_nome',
+        'cliente_id',
         'observacoes',
         'data_venda'
     ];
@@ -27,11 +27,14 @@ class Venda extends Model
         'lucro_total' => 'decimal:2',
         'data_venda' => 'datetime',
     ];
-
-    // Relacionamentos
-    public function itens()
+    public function cliente()
     {
-        return $this->hasMany(ItemVenda::class);
+        return $this->belongsTo(Cliente::class);
+    }
+    // Relacionamentos
+    public function itensVenda()
+    {
+        return $this->hasMany(ItemVenda::class, 'venda_id');
     }
 
     // Accessors

@@ -17,6 +17,7 @@ class Movimentacao extends Model
         'tipo',
         'quantidade',
         'preco_unitario',
+        'preco_custo',
         'total',
         'observacao',
         'data'

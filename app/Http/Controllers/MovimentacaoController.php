@@ -71,6 +71,7 @@ class MovimentacaoController extends Controller
                 'tipo'           => $request->tipo,
                 'quantidade'     => $request->quantidade,
                 'preco_unitario' => $request->preco_unitario,
+                'preco_custo' => $produto->preco_compra_atual,
                 'total'          => $total,
                 'observacao'     => $request->observacao,
                 'data'           => now(),
