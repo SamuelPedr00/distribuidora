@@ -37,6 +37,11 @@ class Venda extends Model
         return $this->hasMany(ItemVenda::class, 'venda_id');
     }
 
+    public function caixa()
+    {
+        return $this->hasOne(Caixa::class, 'venda_id');
+    }
+
     // Accessors
     public function getTotalVendaFormatadoAttribute()
     {

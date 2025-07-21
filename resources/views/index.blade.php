@@ -439,11 +439,10 @@
                             <th>Data</th>
                             <th>Produto</th>
                             <th>Tipo</th>
-                            <th>Quantidade</th>
                             <th>Valor Compra</th>
                             <th>Valor Venda</th>
-                            <th>Observação</th>
                             <th>Lucro</th>
+                            <th>Reverter</th>
                         </tr>
                     </thead>
                     <tbody id="listaVenda">
@@ -452,15 +451,18 @@
                                 <td>{{ \Carbon\Carbon::parse($venda->data_venda)->format('d/m/Y H:i') }}</td>
                                 <td>#{{ $venda->numero_venda }}</td>
                                 <td>{{ ucfirst($venda->status) }}</td>
-                                <td>-</td> {{-- Quantidade total não está no model, precisa calcular via relacionamento --}}
                                 <td>R$ {{ number_format($venda->total_custo, 2, ',', '.') }}</td>
                                 <td>R$ {{ number_format($venda->total_venda, 2, ',', '.') }}</td>
-                                <td>{{ $venda->observacoes ?? '-' }}</td>
                                 <td
                                     style="color: {{ strtolower($venda->status) === 'concluida' ? 'green' : 'red' }};">
                                     R$ {{ number_format($venda->total_venda - $venda->total_custo, 2, ',', '.') }}
                                 </td>
 
+                                <td>
+                                    <button class="btn btn-warning" data-id="{{ $venda->id }}">
+                                        🔁 Reverter
+                                    </button>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -753,6 +755,35 @@
 
             // Chamada inicial
             window.onload = filtrarCaixa;
+        </script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelectorAll('.btn-reverter').forEach(function(button) {
+                    button.addEventListener('click', function() {
+                        const vendaId = this.getAttribute('data-id');
+
+                        if (confirm('Tem certeza que deseja reverter esta venda?')) {
+                            fetch(`/vendas/reverter/${vendaId}`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                    },
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.mensagem) {
+                                        alert(data.mensagem);
+                                        location.reload();
+                                    } else if (data.erro) {
+                                        alert('Erro: ' + data.erro);
+                                    } else {
+                                        alert('Erro inesperado.');
+                                    }
+                                });
+                        }
+                    });
+                });
+            });
         </script>
 
 

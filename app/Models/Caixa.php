@@ -19,6 +19,7 @@ class Caixa extends Model
         'valor',
         'data',
         'movimentacao_id',
+        'venda_id',
     ];
 
     protected $casts = [
@@ -26,7 +27,10 @@ class Caixa extends Model
         'data' => 'date',
     ];
 
-
+    public function venda()
+    {
+        return $this->belongsTo(Venda::class, 'venda_id');
+    }
     public function movimentacao()
     {
         return $this->belongsTo(Movimentacao::class);

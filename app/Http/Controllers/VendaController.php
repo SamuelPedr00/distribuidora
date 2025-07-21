@@ -104,12 +104,43 @@ class VendaController extends Controller
                     'descricao' => $request->observacoes ?? 'Venda registrada',
                     'valor'     => $totalVenda,
                     'data'      => $dataVenda,
+                    'venda_id'  => $venda->id, // Relacionamento com a venda
                 ]);
             });
 
             return redirect()->back()->with('success', 'Venda registrada com sucesso.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    public function reverter($id)
+    {
+        try {
+            DB::transaction(function () use ($id) {
+                $venda = Venda::with('itensVenda', 'itensVenda.produto.estoque')->findOrFail($id);
+
+                // Devolve o estoque
+                foreach ($venda->itensVenda as $item) {
+                    $produto = $item->produto;
+                    if ($produto && $produto->estoque) {
+                        $produto->estoque->increment('quantidade', $item->quantidade);
+                    }
+                }
+
+                // Deleta os itens da venda
+                $venda->itensVenda()->delete();
+
+                // Deleta o lançamento no caixa relacionado
+                Caixa::where('venda_id', $venda->id)->delete();
+
+                // Deleta a venda
+                $venda->delete();
+            });
+
+            return response()->json(['mensagem' => 'Venda revertida e removida com sucesso.']);
+        } catch (\Exception $e) {
+            return response()->json(['erro' => $e->getMessage()], 400);
         }
     }
 

@@ -18,3 +18,4 @@ Route::put('/clientes/{cliente}', [App\Http\Controllers\ClienteController::class
 Route::post('/credito', [App\Http\Controllers\VendaController::class, 'registrarCredito'])->name('cadastro_credito');
 Route::get('/api/cliente/{id}/vendas-pendentes', [App\Http\Controllers\CreditoController::class, 'listarVendasPendentes']);
 Route::post('/receber-venda', [App\Http\Controllers\CreditoController::class, 'receberVenda'])->name('receber.venda');
+Route::post('/vendas/reverter/{id}', [App\Http\Controllers\VendaController::class, 'reverter'])->name('venda_reverter');
