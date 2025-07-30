@@ -1,0 +1,820 @@
+/* ===========================================
+   MODAIS E OVERLAYS - SISTEMA DISTRIBUIDORA
+   =========================================== */
+
+/* ===== MODAL BASE ===== */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: var(--z-modal);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modal-content {
+    background: var(--white) !important;
+    padding: var(--spacing-2xl);
+    border-radius: var(--radius-2xl);
+    width: 90%;
+    max-width: var(--max-width-lg);
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-2xl);
+    animation: slideInUp 0.3s ease-out;
+    position: relative;
+    color: var(--gray-800) !important;
+}
+
+.modal-content h1,
+.modal-content h2,
+.modal-content h3,
+.modal-content h4,
+.modal-content h5,
+.modal-content h6 {
+    color: var(--gray-800) !important;
+}
+
+.modal-content p,
+.modal-content span,
+.modal-content div,
+.modal-content li {
+    color: var(--gray-800) !important;
+}
+
+/* ===== MODAL DE CRÉDITO ===== */
+.modal-credito {
+    position: fixed !important;
+    z-index: 10000 !important;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modal-credito-content {
+    background: var(--white) !important;
+    padding: var(--spacing-2xl);
+    border-radius: var(--radius-2xl);
+    width: 90%;
+    max-width: 700px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-2xl);
+    animation: slideInUp 0.3s ease-out;
+    color: var(--gray-800) !important;
+    position: relative;
+}
+
+.modal-credito-content h1,
+.modal-credito-content h2,
+.modal-credito-content h3,
+.modal-credito-content h4,
+.modal-credito-content h5,
+.modal-credito-content h6 {
+    color: var(--gray-800) !important;
+    margin-bottom: var(--spacing-lg);
+}
+
+.modal-credito-content p,
+.modal-credito-content span,
+.modal-credito-content div,
+.modal-credito-content li {
+    color: var(--gray-800) !important;
+}
+
+.modal-credito-content strong {
+    color: var(--gray-900) !important;
+    font-weight: 700;
+}
+
+.card-credito {
+    background: var(--gray-50) !important;
+    padding: var(--spacing-lg);
+    margin: var(--spacing-md) 0;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-200);
+    transition: all var(--transition-normal);
+    color: var(--gray-800) !important;
+}
+
+.card-credito:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+    background: var(--white) !important;
+}
+
+.card-credito p,
+.card-credito li,
+.card-credito span,
+.card-credito div {
+    color: var(--gray-800) !important;
+}
+
+.card-credito strong {
+    color: var(--gray-900) !important;
+    font-weight: 700;
+}
+
+.card-credito ul {
+    margin: var(--spacing-sm) 0;
+    padding-left: var(--spacing-lg);
+}
+
+.card-credito li {
+    margin-bottom: var(--spacing-xs);
+    color: var(--gray-700) !important;
+}
+
+/* ===== MODAL DE CONFIRMAÇÃO DE VENDA ===== */
+.modal-venda {
+    position: fixed !important;
+    z-index: 9000 !important;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modal-venda-content {
+    background: var(--white) !important;
+    padding: var(--spacing-2xl);
+    border-radius: var(--radius-2xl);
+    width: 90%;
+    max-width: 600px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-2xl);
+    animation: slideInUp 0.3s ease-out;
+    color: var(--gray-800) !important;
+    position: relative;
+}
+
+.modal-venda-content h1,
+.modal-venda-content h2,
+.modal-venda-content h3,
+.modal-venda-content h4,
+.modal-venda-content h5,
+.modal-venda-content h6 {
+    color: var(--gray-800) !important;
+    margin-bottom: var(--spacing-lg);
+}
+
+.modal-venda-content p,
+.modal-venda-content span,
+.modal-venda-content div {
+    color: var(--gray-800) !important;
+}
+
+.modal-venda-content strong {
+    color: var(--gray-900) !important;
+    font-weight: 700;
+}
+
+/* ===== BOTÕES DOS MODAIS ===== */
+.btn-credito {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    font-family: inherit;
+    transition: all var(--transition-normal);
+    margin: var(--spacing-xs);
+    color: var(--white) !important;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-credito::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-credito:hover::before {
+    left: 100%;
+}
+
+.btn-credito.btn-primary {
+    background: var(--primary-gradient);
+    color: var(--white) !important;
+}
+
+.btn-credito.btn-success {
+    background: var(--success-gradient);
+    color: var(--white) !important;
+}
+
+.btn-credito.btn-danger {
+    background: var(--danger-gradient);
+    color: var(--white) !important;
+}
+
+.btn-credito.btn-sm {
+    padding: calc(var(--spacing-xs) * 0.5) var(--spacing-sm);
+    font-size: var(--font-size-xs);
+}
+
+.btn-credito:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-credito:active {
+    transform: translateY(0);
+}
+
+.btn-venda {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    font-family: inherit;
+    transition: all var(--transition-normal);
+    margin: var(--spacing-xs);
+    color: var(--white) !important;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-venda::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-venda:hover::before {
+    left: 100%;
+}
+
+.btn-venda.btn-primary {
+    background: var(--primary-gradient);
+    color: var(--white) !important;
+}
+
+.btn-venda.btn-success {
+    background: var(--success-gradient);
+    color: var(--white) !important;
+}
+
+.btn-venda.btn-secondary {
+    background: var(--info-gradient);
+    color: var(--white) !important;
+}
+
+.btn-venda:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-venda:active {
+    transform: translateY(0);
+}
+
+/* ===== MODAL DE MENSAGENS ===== */
+.msg-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 15000;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.msg-modal-content {
+    background: var(--white) !important;
+    padding: var(--spacing-2xl);
+    border-radius: var(--radius-2xl);
+    width: 90%;
+    max-width: var(--max-width-md);
+    box-shadow: var(--shadow-2xl);
+    text-align: center;
+    position: relative;
+    animation: slideInUp 0.5s ease-out;
+    color: var(--gray-800) !important;
+}
+
+.msg-modal-content p {
+    color: var(--gray-800) !important;
+    margin-bottom: 0;
+}
+
+.msg-modal-success {
+    color: var(--success-color) !important;
+    font-weight: 700;
+    font-size: var(--font-size-lg);
+}
+
+.msg-modal-success p {
+    color: var(--success-color) !important;
+}
+
+.msg-modal-error {
+    color: var(--danger-color) !important;
+    font-weight: 700;
+    font-size: var(--font-size-lg);
+}
+
+.msg-modal-error p {
+    color: var(--danger-color) !important;
+}
+
+.msg-modal-warning {
+    color: var(--warning-color) !important;
+    font-weight: 700;
+    font-size: var(--font-size-lg);
+}
+
+.msg-modal-warning p {
+    color: var(--warning-color) !important;
+}
+
+.msg-modal-info {
+    color: var(--info-color) !important;
+    font-weight: 700;
+    font-size: var(--font-size-lg);
+}
+
+.msg-modal-info p {
+    color: var(--info-color) !important;
+}
+
+.msg-modal-close {
+    position: absolute;
+    top: var(--spacing-md);
+    right: var(--spacing-lg);
+    cursor: pointer;
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--gray-500);
+    transition: color var(--transition-fast);
+    background: none;
+    border: none;
+    padding: 0;
+    width: auto;
+    height: auto;
+    line-height: 1;
+}
+
+.msg-modal-close:hover {
+    color: var(--gray-800);
+}
+
+/* ===== FORMULÁRIOS EM MODAIS ===== */
+.modal-content input,
+.modal-credito-content input,
+.modal-venda-content input,
+.modal-content select,
+.modal-credito-content select,
+.modal-venda-content select,
+.modal-content textarea,
+.modal-credito-content textarea,
+.modal-venda-content textarea {
+    background: var(--white) !important;
+    color: var(--gray-800) !important;
+    border: 2px solid var(--gray-200);
+    width: 100%;
+    padding: var(--spacing-md);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-base);
+    font-family: inherit;
+    transition: all var(--transition-normal);
+}
+
+.modal-content input:focus,
+.modal-credito-content input:focus,
+.modal-venda-content input:focus,
+.modal-content select:focus,
+.modal-credito-content select:focus,
+.modal-venda-content select:focus,
+.modal-content textarea:focus,
+.modal-credito-content textarea:focus,
+.modal-venda-content textarea:focus {
+    outline: none;
+    background: var(--white) !important;
+    color: var(--gray-800) !important;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.modal-content input::placeholder,
+.modal-credito-content input::placeholder,
+.modal-venda-content input::placeholder,
+.modal-content textarea::placeholder,
+.modal-credito-content textarea::placeholder,
+.modal-venda-content textarea::placeholder {
+    color: var(--gray-400) !important;
+    opacity: 1;
+}
+
+.modal-content select option,
+.modal-credito-content select option,
+.modal-venda-content select option {
+    background: var(--white) !important;
+    color: var(--gray-800) !important;
+}
+
+.modal-content label,
+.modal-credito-content label,
+.modal-venda-content label {
+    color: var(--gray-700) !important;
+    font-weight: 600;
+    margin-bottom: var(--spacing-sm);
+    display: block;
+}
+
+/* ===== ELEMENTOS ESPECIAIS DOS MODAIS ===== */
+.form-receber-venda-credito {
+    margin-top: var(--spacing-md);
+}
+
+.border-bottom {
+    border-bottom: 1px solid var(--gray-200) !important;
+    padding-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+/* Estilos específicos para o resumo de venda */
+.modal-venda-content .flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm) 0;
+}
+
+.modal-venda-content .flex-between span {
+    color: var(--gray-800) !important;
+}
+
+.modal-venda-content .flex-between strong {
+    color: var(--gray-900) !important;
+    font-weight: 700;
+}
+
+/* ===== LOADING OVERLAY ===== */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 30000;
+    color: var(--white);
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+}
+
+.loading-content {
+    text-align: center;
+}
+
+.loading-spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid var(--white);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto var(--spacing-lg);
+}
+
+/* ===== TOAST NOTIFICATIONS ===== */
+.toast {
+    position: fixed;
+    top: var(--spacing-lg);
+    right: var(--spacing-lg);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    color: var(--white) !important;
+    font-weight: 600;
+    z-index: 20000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-out;
+    max-width: 300px;
+    word-wrap: break-word;
+    box-shadow: var(--shadow-lg);
+    font-size: var(--font-size-sm);
+}
+
+.toast.show {
+    transform: translateX(0);
+}
+
+.toast-success {
+    background: var(--success-color);
+    color: var(--white) !important;
+}
+
+.toast-error {
+    background: var(--danger-color);
+    color: var(--white) !important;
+}
+
+.toast-warning {
+    background: var(--warning-color);
+    color: var(--gray-800) !important;
+}
+
+.toast-info {
+    background: var(--info-color);
+    color: var(--white) !important;
+}
+
+/* ===== MODAL DE CONFIRMAÇÃO CUSTOMIZADA ===== */
+.confirm-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 25000;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.confirm-modal-content {
+    background: var(--white) !important;
+    padding: var(--spacing-2xl);
+    border-radius: var(--radius-2xl);
+    width: 90%;
+    max-width: var(--max-width-sm);
+    box-shadow: var(--shadow-2xl);
+    text-align: center;
+    color: var(--gray-800) !important;
+    animation: slideInUp 0.3s ease-out;
+}
+
+.confirm-modal-content h3 {
+    color: var(--gray-800) !important;
+    margin-bottom: var(--spacing-lg);
+}
+
+.confirm-modal-content p {
+    color: var(--gray-600) !important;
+    margin-bottom: var(--spacing-xl);
+}
+
+.confirm-modal .btn-group {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: flex-end;
+}
+
+/* ===== RESPONSIVE PARA MODAIS ===== */
+@media (max-width: 768px) {
+
+    .modal-content,
+    .modal-credito-content,
+    .modal-venda-content,
+    .msg-modal-content,
+    .confirm-modal-content {
+        width: 95%;
+        padding: var(--spacing-lg);
+        margin: var(--spacing-sm);
+        max-height: 95vh;
+    }
+
+    .toast {
+        top: var(--spacing-sm);
+        right: var(--spacing-sm);
+        left: var(--spacing-sm);
+        max-width: none;
+        transform: translateY(-100%);
+    }
+
+    .toast.show {
+        transform: translateY(0);
+    }
+
+    .btn-credito,
+    .btn-venda {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: var(--font-size-xs);
+        margin: var(--spacing-xs) / 2;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .modal-content,
+    .modal-credito-content,
+    .modal-venda-content,
+    .msg-modal-content,
+    .confirm-modal-content {
+        width: 98%;
+        padding: var(--spacing-md);
+        border-radius: var(--radius-lg);
+    }
+
+    .card-credito {
+        padding: var(--spacing-md);
+        margin: var(--spacing-sm) 0;
+    }
+
+    .btn-credito,
+    .btn-venda {
+        padding: var(--spacing-xs);
+        font-size: var(--font-size-xs);
+        min-width: 60px;
+    }
+}
+
+/* ===== ANIMAÇÕES ===== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* ===== SCROLLBAR CUSTOMIZADA PARA MODAIS ===== */
+.modal-content::-webkit-scrollbar,
+.modal-credito-content::-webkit-scrollbar,
+.modal-venda-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-track,
+.modal-credito-content::-webkit-scrollbar-track,
+.modal-venda-content::-webkit-scrollbar-track {
+    background: var(--gray-100);
+    border-radius: var(--radius-full);
+}
+
+.modal-content::-webkit-scrollbar-thumb,
+.modal-credito-content::-webkit-scrollbar-thumb,
+.modal-venda-content::-webkit-scrollbar-thumb {
+    background: var(--gray-400);
+    border-radius: var(--radius-full);
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover,
+.modal-credito-content::-webkit-scrollbar-thumb:hover,
+.modal-venda-content::-webkit-scrollbar-thumb:hover {
+    background: var(--gray-500);
+}
+
+/* ===== ESTADOS ESPECIAIS ===== */
+.modal-content.loading,
+.modal-credito-content.loading,
+.modal-venda-content.loading {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.modal-content.loading::after,
+.modal-credito-content.loading::after,
+.modal-venda-content.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    margin: -20px 0 0 -20px;
+    border: 3px solid var(--gray-300);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* ===== FALLBACKS ===== */
+@supports not (backdrop-filter: blur(8px)) {
+
+    .modal,
+    .modal-credito,
+    .modal-venda,
+    .msg-modal,
+    .confirm-modal,
+    .loading-overlay {
+        background: rgba(0, 0, 0, 0.8);
+    }
+}
+
+/* ===== FOCUS MANAGEMENT ===== */
+.modal-content:focus,
+.modal-credito-content:focus,
+.modal-venda-content:focus {
+    outline: none;
+}
+
+.modal-content *:focus-visible,
+.modal-credito-content *:focus-visible,
+.modal-venda-content *:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* ===== DARK MODE OVERRIDES ===== */
+@media (prefers-color-scheme: dark) {
+
+    .modal-content,
+    .modal-credito-content,
+    .modal-venda-content,
+    .msg-modal-content,
+    .confirm-modal-content {
+        background: var(--white) !important;
+        color: var(--gray-800) !important;
+    }
+
+    .modal-content *,
+    .modal-credito-content *,
+    .modal-venda-content *,
+    .msg-modal-content *,
+    .confirm-modal-content * {
+        color: var(--gray-800) !important;
+    }
+
+    .card-credito {
+        background: var(--gray-50) !important;
+        color: var(--gray-800) !important;
+    }
+}
+
+/* ===== END OF MODALS CSS ===== */

@@ -20,10 +20,7 @@ class ClienteController extends Controller
         ]);
 
         // Retorno simples (pode ser JSON, redirect ou view)
-        return response()->json([
-            'mensagem' => 'Cliente cadastrado com sucesso!',
-            'cliente' => $cliente,
-        ]);
+        return redirect()->back()->with('success', 'Cliente Criado com sucesso!');
     }
 
     public function update(Request $request, Cliente $cliente)

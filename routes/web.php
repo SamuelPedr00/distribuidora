@@ -19,3 +19,5 @@ Route::post('/credito', [App\Http\Controllers\VendaController::class, 'registrar
 Route::get('/api/cliente/{id}/vendas-pendentes', [App\Http\Controllers\CreditoController::class, 'listarVendasPendentes']);
 Route::post('/receber-venda', [App\Http\Controllers\CreditoController::class, 'receberVenda'])->name('receber.venda');
 Route::post('/vendas/reverter/{id}', [App\Http\Controllers\VendaController::class, 'reverter'])->name('venda_reverter');
+
+

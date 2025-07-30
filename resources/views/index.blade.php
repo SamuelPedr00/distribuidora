@@ -4,46 +4,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Sistema Distribuidora</title>
+
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/correcao.css') }}">
 </head>
 
 <body>
     <div class="container">
-        <div class="header">
+        <!-- ===== HEADER ===== -->
+        <header class="header">
             <h1>🏢 Sistema Distribuidora</h1>
-            <div class="nav-tabs">
+            <nav class="nav-tabs">
                 <button class="nav-tab active" data-section="dashboard">📊 Dashboard</button>
                 <button class="nav-tab" data-section="produtos">📦 Produtos</button>
                 <button class="nav-tab" data-section="estoque">📋 Estoque</button>
                 <button class="nav-tab" data-section="movimentacao">🔄 Movimentação</button>
-                <button class="nav-tab" data-section="venda">📦 Vendas</button>
+                <button class="nav-tab" data-section="venda">💰 Vendas</button>
                 <button class="nav-tab" data-section="credito">💳 Crédito</button>
-                <button class="nav-tab" data-section="cliente">👨‍🦱 Cliente</button>
-                <button class="nav-tab" data-section="caixa">💰 Fluxo de Caixa</button>
-            </div>
-        </div>
+                <button class="nav-tab" data-section="cliente">👥 Clientes</button>
+                <button class="nav-tab" data-section="caixa">💵 Fluxo de Caixa</button>
+            </nav>
+        </header>
 
-        <!-- Dashboard -->
-        <div id="dashboard" class="content-section active">
+        <!-- ===== DASHBOARD SECTION ===== -->
+        <section id="dashboard" class="content-section active">
             <h2>📊 Dashboard</h2>
+
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-value" id="totalProdutos">{{ $totalProdutos }}</div>
                     <div class="stat-label">Total de Produtos</div>
                 </div>
-
                 <div class="stat-card">
                     <div class="stat-value">{{ $produtosComEstoque }}</div>
-
                     <div class="stat-label">Itens em Estoque</div>
                 </div>
                 <div class="stat-card">
-                    @php
-                        $corSaldo = $valorCaixa >= 0 ? 'text-green-600' : 'text-red-600';
-                    @endphp
-
-                    <div class="stat-value {{ $corSaldo }}" id="saldoCaixa">
+                    <div class="stat-value {{ $valorCaixa >= 0 ? 'text-success' : 'text-danger' }}" id="saldoCaixa">
                         R$ {{ number_format($valorCaixa, 2, ',', '.') }}
                     </div>
                     <div class="stat-label">Saldo em Caixa</div>
@@ -54,7 +53,7 @@
                 </div>
             </div>
 
-            <h3>🚨 Produtos com Estoque Baixo (≤ 10 unidades)</h3>
+            <h3 class="mb-lg">🚨 Produtos com Estoque Baixo (≤ 10 unidades)</h3>
             <div class="table-container">
                 <table>
                     <thead>
@@ -79,122 +78,13 @@
                     </tbody>
                 </table>
             </div>
-        </div>
-        <!-- Crédito -->
-        <div id="credito" class="content-section">
-            <h2>💳 Módulo de Crédito</h2>
+        </section>
 
-            <form method="POST" action="{{ route('cadastro_credito') }}" id="formCredito">
-                @csrf
-                <div id="itensCredito">
-                    <div class="form-row item-credito"></div>
-                </div>
+        <!-- ===== PRODUTOS SECTION ===== -->
+        <section id="produtos" class="content-section">
+            <h2>📦 Gestão de Produtos</h2>
 
-                <button type="button" class="btn btn-secondary" id="addItemCredito" style="margin-top: 15px;">
-                    ➕ Adicionar Produto
-                </button>
-
-                <div class="form-group">
-                    <label>Cliente</label>
-                    <select name="cliente_id" required>
-                        <option value="" disabled selected>Selecione um cliente</option>
-                        @foreach ($clientes as $cliente)
-                            <option value="{{ $cliente->id }}">{{ $cliente->nome }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-
-                <!-- Campo oculto para indicar que é crédito -->
-                <input type="hidden" name="tipo_venda" value="credito">
-
-                <button type="button" class="btn btn-warning" id="registrarCredito">
-                    🟡 Registrar Crédito
-                </button>
-            </form>
-
-
-
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Cliente</th>
-                            <th>Crédito Devedor</th>
-                            <th>Visualizar</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($clientesComCredito as $cliente)
-                            <tr>
-                                <td>{{ $cliente['nome'] }}</td>
-                                <td>R$ {{ number_format($cliente['credito'], 2, ',', '.') }}</td>
-                                <td>
-                                    <a href="#" class="btn btn-primary abrirModalCredito"
-                                        data-cliente-id="{{ $cliente['id'] }}"
-                                        data-cliente-nome="{{ $cliente['nome'] }}">
-                                        📄 Ver Detalhes
-                                    </a>
-
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="3">Nenhum cliente com crédito pendente.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-        </div>
-
-        <div id="cliente" class="content-section">
-            <h2>👨‍🦱 Módulo de Clientes</h2>
-            <form action="{{ route('clientes.store') }}" method="POST">
-                @csrf
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="nomeProduto">Nome do Cliente</label>
-                        <input type="text" id="nomeProduto" name="nome" required>
-                    </div>
-
-                </div>
-
-                <button type="submit" class="btn btn-primary">💾 Cadastrar Cliente</button>
-            </form>
-
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Cliente</th>
-                            <th>Editar</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($clientes as $cliente)
-                            <tr>
-                                <td>{{ $cliente->nome }}</td>
-                                <td>
-                                    <button class="btn-edit"
-                                        onclick="abrirModalCliente({{ $cliente->id }}, '{{ $cliente->nome }}')">
-                                        Editar
-                                    </button>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-
-        </div>
-
-        <!-- Produtos -->
-        <div id="produtos" class="content-section">
-            <h2>📦 Cadastro de Produtos</h2>
-
-            <form id="formProduto" action="{{ route('cadastro_produto') }}" method="POST">
+            <form id="formProduto" action="{{ route('cadastro_produto') }}" method="POST" class="mb-xl">
                 @csrf
                 <div class="form-row">
                     <div class="form-group">
@@ -208,13 +98,15 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="precoProduto">Preço de Compra (R$)</label>
+                        <label for="precoCompra">Preço de Compra (R$)</label>
                         <input type="number" id="precoCompra" name="compra" step="0.01" required>
                     </div>
                     <div class="form-group">
-                        <label for="precoProduto">Preço de Venda (R$)</label>
+                        <label for="precoVenda">Preço de Venda (R$)</label>
                         <input type="number" id="precoVenda" name="venda" step="0.01" required>
                     </div>
+                </div>
+                <div class="form-row">
                     <div class="form-group">
                         <label for="categoriaProduto">Categoria</label>
                         <input type="text" id="categoriaProduto" name="categoria" required>
@@ -250,27 +142,27 @@
                                 <td>{{ $produto->categoria }}</td>
                                 <td>R$ {{ number_format($produto->preco_venda_atual, 2, ',', '.') }}</td>
                                 <td>
-                                    <button class="btn-edit btn-icon" onclick="editarProduto({{ $produto->id }})">✏️
-                                        Editar</button>
-
+                                    <button class="btn-edit" onclick="editarProduto({{ $produto->id }})">
+                                        ✏️ Editar
+                                    </button>
                                 </td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
-        </div>
+        </section>
 
-        <!-- Estoque -->
-        <div id="estoque" class="content-section">
+        <!-- ===== ESTOQUE SECTION ===== -->
+        <section id="estoque" class="content-section">
             <h2>📋 Controle de Estoque</h2>
 
-            <form id="formEstoque" action="{{ route('cadastro_estoque') }}" method="POST">
+            <form id="formEstoque" action="{{ route('cadastro_estoque') }}" method="POST" class="mb-xl">
                 @csrf
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="produto_id">Produto</label>
-                        <select id="produto_id" name="produto_id" required>
+                        <label for="produto_id_estoque">Produto</label>
+                        <select id="produto_id_estoque" name="produto_id" required>
                             <option value="" disabled selected>Selecione um produto</option>
                             @foreach ($produtos as $produto)
                                 <option value="{{ $produto->id }}">{{ $produto->nome }} ({{ $produto->codigo }})
@@ -278,16 +170,13 @@
                             @endforeach
                         </select>
                     </div>
-
                     <div class="form-group">
-                        <label for="quantidade">Quantidade</label>
-                        <input type="number" id="quantidade" name="quantidade" min="0" required>
+                        <label for="quantidade_estoque">Quantidade</label>
+                        <input type="number" id="quantidade_estoque" name="quantidade" min="0" required>
                     </div>
                 </div>
-
-                <button type="submit" class="btn btn-success">➕ Cadastrar Estoque</button>
+                <button type="submit" class="btn btn-success">➕ Atualizar Estoque</button>
             </form>
-
 
             <div class="table-container">
                 <table>
@@ -314,25 +203,26 @@
                                 <td>{{ $quantidade }}</td>
                                 <td>R$ {{ number_format($valorTotal, 2, ',', '.') }}</td>
                                 <td class="{{ $quantidade <= 10 ? 'text-danger' : 'text-success' }}">
-                                    {{ $status }}</td>
+                                    {{ $status }}
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
-
                 </table>
             </div>
-        </div>
+        </section>
 
-        <!-- Movimentação -->
-        <div id="movimentacao" class="content-section">
+        <!-- ===== MOVIMENTAÇÃO SECTION ===== -->
+        <section id="movimentacao" class="content-section">
             <h2>🔄 Movimentação de Estoque</h2>
 
-            <form method="POST" action="{{ route('cadastro_movimentacao') }}" id="formMovimentacao">
+            <form method="POST" action="{{ route('cadastro_movimentacao') }}" id="formMovimentacao"
+                class="mb-xl">
                 @csrf
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="produto_id">Produto</label>
-                        <select id="produto_id" name="produto_id" required>
+                        <label for="produto_id_mov">Produto</label>
+                        <select id="produto_id_mov" name="produto_id" required>
                             <option value="" disabled selected>Selecione um produto</option>
                             @foreach ($produtos as $produto)
                                 <option value="{{ $produto->id }}">{{ $produto->nome }} ({{ $produto->codigo }})
@@ -356,7 +246,7 @@
                     </div>
                     <div class="form-group">
                         <label for="valorMovimentacao">Valor Unitário (R$)</label>
-                        <input type="number" name="preco_unitario" id="precoVenda" step="0.01" required>
+                        <input type="number" name="preco_unitario" id="valorMovimentacao" step="0.01" required>
                     </div>
                 </div>
                 <div class="form-group form-full">
@@ -367,7 +257,7 @@
                 <button type="submit" class="btn btn-success">✅ Registrar Movimentação</button>
             </form>
 
-            <h3>📄 Histórico de Movimentações</h3>
+            <h3 class="mb-lg">📄 Histórico de Movimentações</h3>
             <div class="table-container">
                 <table>
                     <thead>
@@ -394,55 +284,53 @@
                                     <form action="{{ route('movimentacao.reverter', $mov->id) }}" method="POST"
                                         onsubmit="return confirm('Tem certeza que deseja reverter esta movimentação?');">
                                         @csrf
-                                        <button type="submit" class="btn btn-warning">↩️ Reverter</button>
+                                        <button type="submit" class="btn btn-warning btn-sm">↩️ Reverter</button>
                                     </form>
                                 </td>
                             </tr>
                         @endforeach
-
                     </tbody>
                 </table>
             </div>
-        </div>
+        </section>
 
-        <!-- Venda -->
-        <div id="venda" class="content-section">
-            <h2>🔄 Venda de Estoque</h2>
+        <!-- ===== VENDAS SECTION ===== -->
+        <section id="venda" class="content-section">
+            <h2>💰 Gestão de Vendas</h2>
 
-            <form method="POST" action="{{ route('cadastro_venda') }}" id="formVenda">
+            <form method="POST" action="{{ route('cadastro_venda') }}" id="formVenda" class="mb-xl">
                 @csrf
                 <div id="itensVenda">
-                    <div class="form-row item-venda">
-
-
-                    </div>
+                    <!-- Itens serão adicionados dinamicamente -->
                 </div>
 
-                <button type="button" class="btn btn-secondary" id="addItem" style="margin-top: 15px;">➕
-                    Adicionar
-                    Produto</button>
+                <button type="button" class="btn btn-secondary mb-lg" id="addItem">
+                    ➕ Adicionar Produto
+                </button>
 
                 <div class="form-group form-full">
-                    <label>Observações</label>
-                    <input type="text" name="observacoes" placeholder="Motivo da venda">
+                    <label for="observacoes_venda">Observações</label>
+                    <input type="text" name="observacoes" id="observacoes_venda"
+                        placeholder="Observações da venda">
                 </div>
-                <!-- Troque o botão de envio direto por esse -->
-                <button type="button" class="btn btn-success" id="abrirConfirmacao">✅ Registrar Venda</button>
+
+                <button type="button" class="btn btn-success" id="abrirConfirmacao">
+                    ✅ Registrar Venda
+                </button>
             </form>
 
-
-            <h3>📄 Histórico de Vendas</h3>
+            <h3 class="mb-lg">📄 Histórico de Vendas</h3>
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
                             <th>Data</th>
-                            <th>Produto</th>
-                            <th>Tipo</th>
+                            <th>Número</th>
+                            <th>Status</th>
                             <th>Valor Compra</th>
                             <th>Valor Venda</th>
                             <th>Lucro</th>
-                            <th>Reverter</th>
+                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody id="listaVenda">
@@ -454,12 +342,11 @@
                                 <td>R$ {{ number_format($venda->total_custo, 2, ',', '.') }}</td>
                                 <td>R$ {{ number_format($venda->total_venda, 2, ',', '.') }}</td>
                                 <td
-                                    style="color: {{ strtolower($venda->status) === 'concluida' ? 'green' : 'red' }};">
+                                    class="{{ strtolower($venda->status) === 'concluida' ? 'text-success' : 'text-danger' }}">
                                     R$ {{ number_format($venda->total_venda - $venda->total_custo, 2, ',', '.') }}
                                 </td>
-
                                 <td>
-                                    <button class="btn btn-warning" data-id="{{ $venda->id }}">
+                                    <button class="btn btn-danger btn-sm btn-reverter" data-id="{{ $venda->id }}">
                                         🔁 Reverter
                                     </button>
                                 </td>
@@ -468,33 +355,135 @@
                     </tbody>
                 </table>
             </div>
-        </div>
+        </section>
 
+        <!-- ===== CRÉDITO SECTION ===== -->
+        <section id="credito" class="content-section">
+            <h2>💳 Módulo de Crédito</h2>
 
-        <!-- Fluxo de Caixa -->
-        <div id="caixa" class="content-section">
-            <h2>💰 Fluxo de Caixa</h2>
+            <form method="POST" action="{{ route('cadastro_credito') }}" id="formCredito" class="mb-xl">
+                @csrf
+                <div id="itensCredito">
+                    <!-- Itens serão adicionados dinamicamente -->
+                </div>
 
-            <form id="formCaixa" action="{{ route('cadastro_caixa') }}" method="POST">
+                <button type="button" class="btn btn-secondary mb-lg" id="addItemCredito">
+                    ➕ Adicionar Produto
+                </button>
+
+                <div class="form-group">
+                    <label for="cliente_id_credito">Cliente</label>
+                    <select name="cliente_id" id="cliente_id_credito" required>
+                        <option value="" disabled selected>Selecione um cliente</option>
+                        @foreach ($clientes as $cliente)
+                            <option value="{{ $cliente->id }}">{{ $cliente->nome }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <input type="hidden" name="tipo_venda" value="credito">
+
+                <button type="button" class="btn btn-warning" id="registrarCredito">
+                    🟡 Registrar Crédito
+                </button>
+            </form>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Crédito Devedor</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($clientesComCredito as $cliente)
+                            <tr>
+                                <td>{{ $cliente['nome'] }}</td>
+                                <td>R$ {{ number_format($cliente['credito'], 2, ',', '.') }}</td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm abrirModalCredito"
+                                        data-cliente-id="{{ $cliente['id'] }}"
+                                        data-cliente-nome="{{ $cliente['nome'] }}">
+                                        📄 Ver Detalhes
+                                    </button>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="3">Nenhum cliente com crédito pendente.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ===== CLIENTES SECTION ===== -->
+        <section id="cliente" class="content-section">
+            <h2>👥 Gestão de Clientes</h2>
+
+            <form action="{{ route('clientes.store') }}" method="POST" class="mb-xl">
                 @csrf
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="tipo">Tipo</label>
-                        <select name="tipo" id="tipo" required>
+                        <label for="nomeCliente">Nome do Cliente</label>
+                        <input type="text" id="nomeCliente" name="nome" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">💾 Cadastrar Cliente</button>
+            </form>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($clientes as $cliente)
+                            <tr>
+                                <td>{{ $cliente->nome }}</td>
+                                <td>
+                                    <button class="btn-edit btn-sm"
+                                        onclick="abrirModalCliente({{ $cliente->id }}, '{{ $cliente->nome }}')">
+                                        ✏️ Editar
+                                    </button>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ===== FLUXO DE CAIXA SECTION ===== -->
+        <section id="caixa" class="content-section">
+            <h2>💵 Fluxo de Caixa</h2>
+
+            <form id="formCaixa" action="{{ route('cadastro_caixa') }}" method="POST" class="mb-xl">
+                @csrf
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tipo_caixa">Tipo</label>
+                        <select name="tipo" id="tipo_caixa" required>
                             <option value="">Selecione o tipo</option>
                             <option value="entrada">💵 Entrada</option>
                             <option value="saida">💸 Saída</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="valor">Valor (R$)</label>
-                        <input type="number" id="valor" name="valor" step="0.01" required>
+                        <label for="valor_caixa">Valor (R$)</label>
+                        <input type="number" id="valor_caixa" name="valor" step="0.01" required>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="categoria">Categoria</label>
-                        <select id="categoria" name="categoria" required>
+                        <label for="categoria_caixa">Categoria</label>
+                        <select id="categoria_caixa" name="categoria" required>
                             <option value="">Selecione a categoria</option>
                             <option value="venda">💰 Venda de Produtos</option>
                             <option value="compra">📦 Compra de Produtos</option>
@@ -516,8 +505,9 @@
                 <button type="submit" class="btn btn-warning">💾 Registrar no Caixa</button>
             </form>
 
-            <h3>📊 Filtros e Resumo</h3>
+            <!-- Filtros -->
             <div class="filter-section">
+                <h3 class="mb-lg">📊 Filtros e Resumo</h3>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="dataInicio">Data Início</label>
@@ -544,14 +534,15 @@
                             <option value="outros">📝 Outros</option>
                         </select>
                     </div>
-                    <div class="form-group" style="display: flex; align-items: end;">
+                    <div class="form-group flex-center gap-sm">
                         <button type="button" class="btn btn-primary" onclick="filtrarCaixa()">🔍 Filtrar</button>
-                        <button type="button" class="btn btn-secondary" onclick="limparFiltros()"
-                            style="margin-left: 10px;">🗑️ Limpar</button>
+                        <button type="button" class="btn btn-secondary" onclick="limparFiltros()">🗑️
+                            Limpar</button>
                     </div>
                 </div>
             </div>
 
+            <!-- Stats -->
             <div class="stats-grid">
                 <div class="stat-card entrada">
                     <div class="stat-value" id="totalEntradas">R$ 0,00</div>
@@ -567,12 +558,14 @@
                 </div>
             </div>
 
+            <!-- Resumo por categoria -->
             <div class="resumo-categorias">
                 <h4>📊 Resumo por Categoria</h4>
                 <div id="resumoCategorias" class="categorias-grid"></div>
             </div>
 
-            <h3>📄 Movimentações do Caixa</h3>
+            <!-- Tabela de movimentações -->
+            <h3 class="mb-lg">📄 Movimentações do Caixa</h3>
             <div class="table-container">
                 <table>
                     <thead>
@@ -588,520 +581,95 @@
                     <tbody id="listaCaixa"></tbody>
                 </table>
             </div>
+        </section>
+    </div>
+
+    <!-- ===== MODALS ===== -->
+    @include('modals.ver_detalhes')
+    @include('modals.confirma_venda')
+    @include('modals.confirma_credito')
+    @include('modals.editar_cliente')
+    @include('modals.edicao_produto')
+
+
+    <!-- Modal de Mensagens -->
+    <div id="msgModal" class="msg-modal">
+        <div class="msg-modal-content" id="msgModalContent">
+            <span id="msgModalClose" class="msg-modal-close">&times;</span>
+            <p id="msgModalText"></p>
         </div>
-
-
-        <script src="{{ asset('js/jquery.js') }}"></script>
-
-        <script src="{{ asset('js/script.js') }}"></script>
-        <script src="{{ asset('js/bloqueio.js') }}"></script>
-
-        @include('modals.ver_detalhes')
-
-
-        <script>
-            document.querySelectorAll('.abrirModalCredito').forEach(botao => {
-                botao.addEventListener('click', function(e) {
-                    e.preventDefault();
-
-                    const clienteId = this.dataset.clienteId;
-                    const nomeCliente = this.dataset.clienteNome;
-
-                    fetch(`/api/cliente/${clienteId}/vendas-pendentes`)
-                        .then(res => {
-                            if (!res.ok) {
-                                throw new Error('Erro na requisição');
-                            }
-                            return res.json();
-                        })
-                        .then(vendas => {
-                            let html = '';
-                            let total = 0;
-
-                            if (vendas.length === 0) {
-                                html = '<p>Nenhuma venda pendente.</p>';
-                            } else {
-                                vendas.forEach(venda => {
-                                    const subtotal = parseFloat(venda.total_venda || 0);
-                                    total += subtotal;
-
-                                    html += `
-                            <div class="card">
-                                <p><strong>Venda:</strong> ${venda.numero_venda || 'N/A'}</p>
-                                <p><strong>Data:</strong> ${venda.data_venda ? new Date(venda.data_venda).toLocaleString() : 'N/A'}</p>
-                                <ul style="margin-bottom: 5px;">
-                                    ${venda.itens && venda.itens.length > 0 ? 
-                                        venda.itens.map(item =>
-                                            `<li>${item.produto.nome} (${item.quantidade} x R$ ${parseFloat(item.preco_venda_unitario || 0).toFixed(2).replace('.', ',')})</li>`
-                                        ).join('') : 
-                                        '<li>Nenhum item encontrado</li>'
-                                    }
-                                </ul>
-                                <p><strong>Total:</strong> R$ ${subtotal.toFixed(2).replace('.', ',')}</p>
-                                <form method="POST" action="/receber-venda" style="margin-top: 5px;">
-                                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                    <input type="hidden" name="venda_id" value="${venda.id}">
-                                    <button type="submit" class="btn btn-success">💰 Receber</button>
-                                </form>
-                                <hr>
-                            </div>
-                        `;
-                                });
-                            }
-
-                            document.getElementById('nomeClienteModal').textContent = nomeCliente;
-                            document.getElementById('conteudoCreditos').innerHTML = html;
-                            document.getElementById('totalCredito').textContent = total.toFixed(2).replace(
-                                '.', ',');
-
-                            document.getElementById('modalCredito').style.display = 'flex';
-                        })
-                        .catch(error => {
-                            console.error('Erro:', error);
-                            alert('Erro ao buscar vendas pendentes.');
-                        });
-                });
-            });
-
-            document.getElementById('fecharModalCredito').addEventListener('click', function() {
-                document.getElementById('modalCredito').style.display = 'none';
-            });
-        </script>
-
-
-        @include('modals.editar_cliente')
-
-        <script>
-            function abrirModalCliente(id, nome) {
-                document.getElementById('modal-editar-cliente').style.display = 'flex';
-                document.getElementById('cliente_id').value = id;
-                document.getElementById('cliente_nome').value = nome;
-
-                // Atualiza o action do form dinamicamente
-                const form = document.getElementById('form-editar-cliente');
-                form.action = `/clientes/${id}`;
-            }
-
-            function fecharModalCliente() {
-                document.getElementById('modal-editar-cliente').style.display = 'none';
-            }
-        </script>
-
-        <script>
-            function filtrarCaixa() {
-                const dataInicio = document.getElementById('dataInicio').value;
-                const dataFim = document.getElementById('dataFim').value;
-                const categoria = document.getElementById('filtroCategoria').value;
-
-                fetch(`/caixa/filtro?dataInicio=${dataInicio}&dataFim=${dataFim}&categoria=${categoria}`)
-                    .then(response => response.json())
-                    .then(data => {
-
-                        atualizarTotais(data);
-                        listarMovimentacoes(data.dados);
-                        listarResumoCategorias(data.resumo);
-                    });
-            }
-
-            function atualizarTotais(data) {
-                document.getElementById('totalEntradas').textContent = formatarValor(data.entradas);
-                document.getElementById('totalSaidas').textContent = formatarValor(data.saidas);
-                document.getElementById('saldoPeriodo').textContent = formatarValor(data.saldo);
-            }
-
-            function listarMovimentacoes(dados) {
-                const tbody = document.getElementById('listaCaixa');
-                tbody.innerHTML = '';
-
-                dados.forEach(item => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${item.data}</td>
-                        <td>${item.tipo}</td>
-                        <td>${item.categoria}</td>
-                        <td>${item.descricao}</td>
-                        <td>${formatarValor(item.valor)}</td>
-                        <td><!-- Ações aqui, como Editar/Excluir --></td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            }
-
-            function listarResumoCategorias(resumo) {
-                const container = document.getElementById('resumoCategorias');
-                container.innerHTML = '';
-
-                for (let categoria in resumo) {
-                    const div = document.createElement('div');
-                    div.classList.add('categoria-resumo');
-                    div.innerHTML = `<strong>${categoria}:</strong> ${formatarValor(resumo[categoria])}`;
-                    container.appendChild(div);
-                }
-            }
-
-            function limparFiltros() {
-                document.getElementById('dataInicio').value = '';
-                document.getElementById('dataFim').value = '';
-                document.getElementById('filtroCategoria').value = '';
-                filtrarCaixa(); // recarrega tudo
-            }
-
-            function formatarValor(valor) {
-                return new Intl.NumberFormat('pt-BR', {
-                    style: 'currency',
-                    currency: 'BRL'
-                }).format(valor);
-            }
-
-            // Chamada inicial
-            window.onload = filtrarCaixa;
-        </script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                document.querySelectorAll('.btn-reverter').forEach(function(button) {
-                    button.addEventListener('click', function() {
-                        const vendaId = this.getAttribute('data-id');
-
-                        if (confirm('Tem certeza que deseja reverter esta venda?')) {
-                            fetch(`/vendas/reverter/${vendaId}`, {
-                                    method: 'POST',
-                                    headers: {
-                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                    },
-                                })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.mensagem) {
-                                        alert(data.mensagem);
-                                        location.reload();
-                                    } else if (data.erro) {
-                                        alert('Erro: ' + data.erro);
-                                    } else {
-                                        alert('Erro inesperado.');
-                                    }
-                                });
-                        }
-                    });
-                });
-            });
-        </script>
-
-
-        @include('modals.confirma_venda')
-        <script>
-            let formularioAtual = null;
-
-            function formatarPreco(valor) {
-                return parseFloat(valor).toFixed(2).replace('.', ',');
-            }
-
-            function abrirModalConfirmacao(formulario) {
-                const itens = formulario.querySelectorAll('.item-venda');
-                let resumoHtml = '';
-                let total = 0;
-
-                itens.forEach((item) => {
-                    const produtoSelect = item.querySelector('.produto-select');
-                    const quantidadeInput = item.querySelector('input[name*="[quantidade]"]');
-                    const precoSelect = item.querySelector('.select-preco');
-
-                    if (!produtoSelect || !quantidadeInput || !precoSelect) return;
-
-                    const produtoNome = produtoSelect.selectedIndex > -1 ?
-                        produtoSelect.options[produtoSelect.selectedIndex].text :
-                        'Produto não selecionado';
-
-                    const quantidade = parseInt(quantidadeInput.value) || 0;
-                    const preco = parseFloat(precoSelect.value) || 0;
-                    const subtotal = quantidade * preco;
-
-                    total += subtotal;
-
-                    resumoHtml += `
-                        <p>
-                            ${produtoNome} (${quantidade} x R$ ${formatarPreco(preco)}) 
-                            = <strong>R$ ${formatarPreco(subtotal)}</strong>
-                        </p>`;
-                });
-
-                document.getElementById('resumoVenda').innerHTML = resumoHtml || '<p>Nenhum item adicionado.</p>';
-                document.getElementById('totalVenda').textContent = formatarPreco(total);
-                document.getElementById('confirmarVendaModal').style.display = 'flex';
-            }
-
-            // Abertura do modal para venda
-            document.getElementById('abrirConfirmacao').addEventListener('click', function() {
-                formularioAtual = document.getElementById('formVenda');
-                abrirModalConfirmacao(formularioAtual);
-            });
-
-            // Abertura do modal para crédito
-            document.getElementById('registrarCredito').addEventListener('click', function() {
-                formularioAtual = document.getElementById('formCredito');
-                abrirModalConfirmacao(formularioAtual);
-            });
-
-            // Confirma o envio do formulário atual
-            document.getElementById('confirmarSubmit').addEventListener('click', function() {
-                if (formularioAtual) {
-                    formularioAtual.submit();
-                }
-            });
-
-            // Fecha o modal
-            document.getElementById('cancelarModal').addEventListener('click', function() {
-                document.getElementById('confirmarVendaModal').style.display = 'none';
-            });
-        </script>
-
-
-
-
-        <div id="msgModal" class="msg-modal">
-            <div class="msg-modal-content" id="msgModalContent">
-                <span id="msgModalClose" class="msg-modal-close">&times;</span>
-                <p id="msgModalText"></p>
-            </div>
-        </div>
-
-        <script>
-            let index = 1;
-
-            // Adiciona novo item de venda
-            document.getElementById('addItem').addEventListener('click', function() {
-                const container = document.getElementById('itensVenda');
-                const newRow = document.createElement('div');
-                newRow.classList.add('form-row', 'item-venda');
-                newRow.innerHTML = `
-                    <div class="form-group">
-                        <label>Produto</label>
-                        <select name="itens[${index}][produto_id]" class="produto-select" required>
-                            <option value="" disabled selected>Selecione um produto</option>
-                            @foreach ($produtos as $produto)
-                                <option value="{{ $produto->id }}">{{ $produto->nome }} ({{ $produto->codigo }})</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Quantidade</label>
-                        <input type="number" name="itens[${index}][quantidade]" min="1" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Preço</label>
-                        <select name="itens[${index}][preco]" class="select-preco" required>
-                            <option value="">Selecione um produto primeiro</option>
-                        </select>
-                    </div>
-                    <button type="button" class="btn btn-danger remove-item">🗑</button>
-                `;
-                container.appendChild(newRow);
-                index++;
-            });
-
-            // Remove item
-            document.addEventListener('click', function(e) {
-                if (e.target.classList.contains('remove-item')) {
-                    e.target.closest('.item-venda').remove();
-                }
-            });
-
-            // Escuta mudanças em qualquer select de produto
-            document.addEventListener('change', function(e) {
-                if (e.target.classList.contains('produto-select')) {
-                    const produtoId = e.target.value;
-                    const itemVenda = e.target.closest('.item-venda');
-                    const selectPreco = itemVenda.querySelector('.select-preco');
-
-                    if (!produtoId) return;
-
-                    fetch('/produto/precos/' + produtoId)
-                        .then(response => response.json())
-                        .then(data => {
-                            selectPreco.innerHTML = '';
-
-                            if (data.preco_venda_atual) {
-                                selectPreco.innerHTML += `
-                                    <option value="${data.preco_venda_atual}">
-                                        Unitário - R$ ${parseFloat(data.preco_venda_atual).toFixed(2).replace('.', ',')}
-                                    </option>`;
-                            }
-
-                            if (data.preco_venda_fardo) {
-                                selectPreco.innerHTML += `
-                                    <option value="${data.preco_venda_fardo}">
-                                        Fardo - R$ ${parseFloat(data.preco_venda_fardo).toFixed(2).replace('.', ',')}
-                                    </option>`;
-                            }
-                        })
-                        .catch(() => {
-                            alert('Erro ao buscar preços do produto.');
-                        });
-                }
-            });
-        </script>
-
-        <script>
-            let indexCredito = 1;
-
-            document.getElementById('addItemCredito').addEventListener('click', function() {
-                const container = document.getElementById('itensCredito');
-                const newRow = document.createElement('div');
-                newRow.classList.add('form-row', 'item-venda');
-                newRow.innerHTML = `
-            <div class="form-group">
-                <label>Produto</label>
-                <select name="itens[${indexCredito}][produto_id]" class="produto-select" required>
-                    <option value="" disabled selected>Selecione um produto</option>
-                    @foreach ($produtos as $produto)
-                        <option value="{{ $produto->id }}">{{ $produto->nome }} ({{ $produto->codigo }})</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Quantidade</label>
-                <input type="number" name="itens[${indexCredito}][quantidade]" min="1" required>
-            </div>
-            <div class="form-group">
-                <label>Preço</label>
-                <select name="itens[${indexCredito}][preco]" class="select-preco" required>
-                    <option value="">Selecione um produto primeiro</option>
-                </select>
-            </div>
-            <button type="button" class="btn btn-danger remove-item">🗑</button>
-        `;
-                container.appendChild(newRow);
-                indexCredito++;
-            });
-
-            // Reaproveita o mesmo fetch de preços
-            document.addEventListener('change', function(e) {
-                if (e.target.classList.contains('produto-select')) {
-                    const produtoId = e.target.value;
-                    const itemVenda = e.target.closest('.item-venda');
-                    const selectPreco = itemVenda.querySelector('.select-preco');
-
-                    if (!produtoId) return;
-
-                    fetch('/produto/precos/' + produtoId)
-                        .then(response => response.json())
-                        .then(data => {
-                            selectPreco.innerHTML = '';
-
-                            if (data.preco_venda_atual) {
-                                selectPreco.innerHTML += `
-                            <option value="${data.preco_venda_atual}">
-                                Unitário - R$ ${parseFloat(data.preco_venda_atual).toFixed(2).replace('.', ',')}
-                            </option>`;
-                            }
-
-                            if (data.preco_venda_fardo) {
-                                selectPreco.innerHTML += `
-                            <option value="${data.preco_venda_fardo}">
-                                Fardo - R$ ${parseFloat(data.preco_venda_fardo).toFixed(2).replace('.', ',')}
-                            </option>`;
-                            }
-                        })
-                        .catch(() => {
-                            alert('Erro ao buscar preços do produto.');
-                        });
-                }
-            });
-
-            // Remove item
-            document.addEventListener('click', function(e) {
-                if (e.target.classList.contains('remove-item')) {
-                    e.target.closest('.item-venda').remove();
-                }
-            });
-
-            // Validação e envio do crédito
-            document.getElementById('registrarCredito').addEventListener('click', function() {
-                const itens = document.querySelectorAll('#itensCredito .item-venda');
-                if (itens.length === 0) {
-                    alert('Adicione ao menos um item antes de registrar o crédito.');
-                    return;
-                }
-                document.getElementById('formCredito').submit();
-            });
-        </script>
-
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const modal = document.getElementById('msgModal');
-                const texto = document.getElementById('msgModalText');
-                const btnFechar = document.getElementById('msgModalClose');
-                const modalContent = document.getElementById('msgModalContent');
-
+    </div>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script src="{{ asset('js/jquery.js') }}"></script>
+    <script src="{{ asset('js/core/navigation.js') }}"></script>
+    <script src="{{ asset('js/core/modal-system.js') }}"></script>
+    <script src="{{ asset('js/modules/produtos.js') }}"></script>
+    <script src="{{ asset('js/modules/vendas.js') }}"></script>
+    <script src="{{ asset('js/modules/credito.js') }}"></script>
+    <script src="{{ asset('js/modules/clientes.js') }}"></script>
+    <script src="{{ asset('js/modules/caixa.js') }}"></script>
+    <script src="{{ asset('js/modules/messages.js') }}"></script>
+    <script src="{{ asset('js/app.js') }}"></script>
+
+    <!-- Dados para os scripts -->
+    <script>
+        window.APP_DATA = {
+            produtos: @json($produtos),
+            clientes: @json($clientes),
+            csrfToken: '{{ csrf_token() }}'
+        };
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Aguardar um pouco para garantir que o sistema de mensagens foi inicializado
+            setTimeout(() => {
+                console.log('🔍 Verificando mensagens do Laravel...');
+
+                // Verificar se há mensagens de sessão do Laravel
                 @if (session('success'))
-                    texto.textContent = "{{ session('success') }}";
-                    modalContent.classList.add('msg-modal-success');
-                    modal.style.display = 'flex';
-                @elseif ($errors->any())
-                    // Pega todas as mensagens e junta em string separada por quebra de linha
-                    let erros = "";
-                    @foreach ($errors->all() as $error)
-                        erros += "- {{ $error }}\n";
-                    @endforeach
-
-                    texto.textContent = erros.trim();
-                    modalContent.classList.add('msg-modal-error');
-                    modal.style.display = 'flex';
-                @elseif (session('error'))
-                    texto.textContent = "{{ session('error') }}";
-                    modalContent.classList.add('msg-modal-error');
-                    modal.style.display = 'flex';
+                    if (window.showSuccess) {
+                        window.showSuccess("{{ session('success') }}", 4000);
+                        console.log('✅ Mensagem de sucesso exibida');
+                    }
                 @endif
 
-                btnFechar.onclick = () => {
-                    modal.style.display = 'none';
-                };
-
-                window.onclick = (event) => {
-                    if (event.target == modal) {
-                        modal.style.display = 'none';
+                @if (session('error'))
+                    if (window.showError) {
+                        window.showError("{{ session('error') }}");
+                        console.log('❌ Mensagem de erro exibida');
                     }
-                };
-            });
-        </script>
+                @endif
 
+                @if (session('warning'))
+                    if (window.showWarning) {
+                        window.showWarning("{{ session('warning') }}", 5000);
+                        console.log('⚠️ Mensagem de aviso exibida');
+                    }
+                @endif
 
-        <!-- script e modal para funcionamento da edição de Produto -->
+                @if (session('info'))
+                    if (window.showInfo) {
+                        window.showInfo("{{ session('info') }}", 3000);
+                        console.log('ℹ️ Mensagem de info exibida');
+                    }
+                @endif
 
-        @include('modals.edicao_produto')
+                @if ($errors->any())
+                    if (window.showError) {
+                        let erros = "";
+                        @foreach ($errors->all() as $error)
+                            erros += "• {{ $error }}\n";
+                        @endforeach
+                        window.showError(erros.trim());
+                        console.log('❌ Erros de validação exibidos');
+                    }
+                @endif
 
-        <script>
-            const produtos = @json($produtos);
-
-            function editarProduto(id) {
-                const produto = produtos.find(p => p.id === id);
-                if (!produto) return;
-
-                // Formulário de edição
-                const formEditar = document.getElementById('formEditarProduto');
-                formEditar.action = `/produtos/${produto.id}`;
-
-                document.getElementById('editProdutoId').value = produto.id;
-                document.getElementById('editNome').value = produto.nome;
-                document.getElementById('editCodigo').value = produto.codigo;
-                document.getElementById('editCategoria').value = produto.categoria;
-                document.getElementById('editCompra').value = produto.preco_compra_atual;
-                document.getElementById('editVenda').value = produto.preco_venda_atual;
-                document.getElementById('editFardo').value = produto.preco_venda_fardo ?? '';
-
-                // Formulário de exclusão
-                const formExcluir = document.getElementById('formExcluirProduto');
-                formExcluir.action = `/produtos/desativar/${produto.id}`;
-
-                // Exibir modal
-                document.getElementById('modalEditarProduto').style.display = 'flex';
-            }
-
-            function fecharModal() {
-                document.getElementById('modalEditarProduto').style.display = 'none';
-            }
-        </script>
-
-
+            }, 500); // Aguarda 500ms para garantir que tudo foi carregado
+        });
+    </script>
 </body>
 
 </html>
