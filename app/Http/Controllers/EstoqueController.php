@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Estoque;
+use App\Models\Produto;
+
 use Illuminate\Http\Request;
 
 class EstoqueController extends Controller
@@ -37,5 +39,26 @@ class EstoqueController extends Controller
         }
 
         return redirect()->back()->with('success', 'Estoque cadastrado/atualizado com sucesso!');
+    }
+
+    public function atualizar(Request $request)
+    {
+        $request->validate([
+            'produto_id' => 'required|exists:produtos,id',
+            'quantidade' => 'required|integer|min:0',
+        ]);
+
+        $produto = Produto::findOrFail($request->produto_id);
+
+        if ($produto->estoque) {
+            $produto->estoque->quantidade = $request->quantidade;
+            $produto->estoque->save();
+        } else {
+            $produto->estoque()->create([
+                'quantidade' => $request->quantidade
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Estoque atualizado com sucesso!');
     }
 }

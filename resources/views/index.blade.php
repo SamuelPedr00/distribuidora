@@ -146,6 +146,7 @@
                                         ✏️ Editar
                                     </button>
                                 </td>
+
                             </tr>
                         @endforeach
                     </tbody>
@@ -187,6 +188,7 @@
                             <th>Quantidade</th>
                             <th>Valor Total</th>
                             <th>Status</th>
+                            <th>Ação</th>
                         </tr>
                     </thead>
                     <tbody id="listaEstoque">
@@ -204,6 +206,11 @@
                                 <td>R$ {{ number_format($valorTotal, 2, ',', '.') }}</td>
                                 <td class="{{ $quantidade <= 10 ? 'text-danger' : 'text-success' }}">
                                     {{ $status }}
+                                </td>
+                                <td>
+                                    <button class="btn-edit" onclick="editarEstoque({{ $produto->id }})">
+                                        ✏️ Editar
+                                    </button>
                                 </td>
                             </tr>
                         @endforeach
@@ -590,6 +597,8 @@
     @include('modals.confirma_credito')
     @include('modals.editar_cliente')
     @include('modals.edicao_produto')
+    @include('modals.edicao_estoque')
+
 
 
     <!-- Modal de Mensagens -->
@@ -610,6 +619,8 @@
     <script src="{{ asset('js/modules/clientes.js') }}"></script>
     <script src="{{ asset('js/modules/caixa.js') }}"></script>
     <script src="{{ asset('js/modules/messages.js') }}"></script>
+    <script src="{{ asset('js/modules/estoque.js') }}"></script>
+
     <script src="{{ asset('js/app.js') }}"></script>
 
     <!-- Dados para os scripts -->
